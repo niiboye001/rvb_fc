@@ -3,8 +3,8 @@ import { Text, View } from "react-native";
 
 const NoData = () => {
   return (
-    <View className="flex flex-col items-center justify-center py-10 bg-slate-50 rounded-lg">
-      <Text className="uppercase text-slate-500">No data</Text>
+    <View className="flex items-center justify-center py-2 rounded-lg">
+      <Text className="text-slate-300 text-3xl font-extrabold">No data</Text>
     </View>
   );
 };
