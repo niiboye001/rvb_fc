@@ -41,9 +41,9 @@ const CurrentResultScreen = () => {
         <Text className="uppercase text-slate-500 pr-1">Click here </Text>
         <TouchableOpacity activeOpacity={0.8}>
           <LinearGradient
-            colors={[colors.blue[300], colors.blue[400]]}
+            colors={[colors.slate[300], colors.slate[400]]}
             style={{ borderRadius: 50, padding: 10 }}>
-            <Ionicons name="add" size={20} color={colors.blue[500]} />
+            <Ionicons name="add" size={20} color={colors.slate[500]} />
           </LinearGradient>
         </TouchableOpacity>
         <Text className="uppercase text-slate-500 pr-1">to add today's match result. </Text>
