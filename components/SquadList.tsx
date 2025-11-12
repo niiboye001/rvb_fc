@@ -4,11 +4,11 @@ import { Text, View } from "react-native";
 const SquadList = () => {
   return (
     <View className="flex-row justify-between pt-5">
-      <View>
-        <Text className="font-semibold italic text[11px] text-slate-400 ">Blue Team</Text>
+      <View className="">
+        <Text className="pr-1 uppercase text[15px] text-slate-500 font-semibold">Blue Team</Text>
       </View>
-      <View>
-        <Text className="font-semibold italic text[11px] text-slate-400">Red Team</Text>
+      <View className="">
+        <Text className="pr-1 uppercase text[15px] text-slate-500 font-semibold">Red Team</Text>
       </View>
     </View>
   );
