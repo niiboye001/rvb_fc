@@ -1,12 +1,15 @@
+import NewPlayerForm from "@/components/NewPlayerForm";
 import SquadList from "@/components/SquadList";
 import Subtitles from "@/components/Subtitles";
 import Ionicons from "@react-native-vector-icons/ionicons";
 import { LinearGradient } from "expo-linear-gradient";
-import React from "react";
+import React, { useState } from "react";
 import { Text, TouchableOpacity, View } from "react-native";
 import * as colors from "tailwindcss/colors";
 
 const LeagueTableScreen = () => {
+  const [isShowPlayerForm, setIsShowPlayerForm] = useState(false);
+
   return (
     <>
       <View className="px-7 py-5 bg-white mx-3 my-3 rounded-lg flex flex-col gap-2">
@@ -98,7 +101,9 @@ const LeagueTableScreen = () => {
       </View>
 
       <View className="mt-5">
-        <TouchableOpacity activeOpacity={0.8}>
+        <TouchableOpacity
+          activeOpacity={0.8}
+          onPress={() => setIsShowPlayerForm(!isShowPlayerForm)}>
           <View className="flex flex-row items-center justify-end pr-3">
             <LinearGradient
               colors={[colors.blue[400], colors.blue[600]]}
@@ -113,10 +118,12 @@ const LeagueTableScreen = () => {
       </View>
 
       {/* SQUAD LIST */}
-      <View className="px-7 py-5 bg-white mx-3 my-3 rounded-lg flex flex-col gap-2">
-        <Subtitles subtitle="squad list" />
-        <SquadList />
-      </View>
+      {!isShowPlayerForm ?
+        <View className="px-7 py-5 bg-white mx-3 my-3 rounded-lg flex flex-col gap-2">
+          <Subtitles subtitle="squad list" />
+          <SquadList />
+        </View>
+      : <NewPlayerForm />}
     </>
   );
 };
