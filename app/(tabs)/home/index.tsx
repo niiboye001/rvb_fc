@@ -22,7 +22,7 @@ const CurrentResultScreen = () => {
         : <NoData />}
       </View>
       <View className="px-7 py-5 bg-white mx-3 my-3 rounded-lg flex flex-col gap-7">
-        <Subtitles subtitle="Scorers and Assists" />
+        <Subtitles subtitle="Scorers and Assist Providers" />
         {data ?
           <>
             <View className="flex flex-row gap-5 items-center justify-between">
