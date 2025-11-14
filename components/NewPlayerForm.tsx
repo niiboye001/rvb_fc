@@ -1,21 +1,33 @@
+import { api } from "@/convex/_generated/api";
+import { useMutation } from "convex/react";
 import React, { useState } from "react";
-import { TextInput, View } from "react-native";
-import DropDownPicker from "react-native-dropdown-picker";
-import colors from "tailwindcss/colors";
+import { Alert, TextInput, View } from "react-native";
 import Buttons from "./Buttons";
 import Subtitles from "./Subtitles";
 
-const NewPlayerForm = () => {
-  const [newPlayer, setNewPlayer] = useState("");
-  const [phone, setPhone] = useState("");
-  const [team, setTeam] = useState("");
-  const [open, setOpen] = useState(false);
-  const [items, setItems] = useState([
-    { label: "Forward", value: "forward" },
-    { label: "Midfielder", value: "midfielder" },
-    { label: "Defender", value: "defender" },
-    { label: "Goalkeeper", value: "goalkeeper" },
-  ]);
+// type TeamItemTypes = {
+//   label: string;
+//   value: string;
+// };
+
+const NewPlayerForm = async () => {
+  const [newPlayer, setNewPlayer] = useState<string | undefined>("");
+  const [phone, setPhone] = useState<string | undefined>("");
+
+  // ADD NEW PLAYER
+  const addPlayer = useMutation(api.players.addPlayer);
+
+  const handleAddPlayer = async () => {
+    try {
+      if (newPlayer?.trim() && phone?.trim()) {
+        await addPlayer({ name: newPlayer, phone: phone });
+      } else {
+        return;
+      }
+    } catch (error) {
+      Alert.alert("Error", "Failed to insert data: " + error);
+    }
+  };
 
   return (
     <View className="px-7 py-5 bg-white my-3 rounded-lg flex flex-col gap-2">
@@ -33,7 +45,7 @@ const NewPlayerForm = () => {
           placeholder="Phone Number..."
           className="border border-slate-300 p-3 rounded-lg text-[17px] text-slate-600"
         />
-        <View>
+        {/* <View>
           <DropDownPicker
             flatListProps={{ scrollEnabled: false }}
             open={open}
@@ -42,15 +54,16 @@ const NewPlayerForm = () => {
             setOpen={setOpen}
             setValue={setTeam}
             setItems={setItems}
+            onChangeValue={handleChange}
             placeholder="Select team"
             style={{ borderColor: "#ccc" }}
             labelStyle={{ fontSize: 15, color: colors.slate[500] }}
             dropDownContainerStyle={{ borderColor: "#ccc" }}
           />
-        </View>
+        </View> */}
       </View>
       <View className="flex-row items-center justify-end gap-2">
-        <Buttons sender="save" />
+        <Buttons sender="save" handleAddPlayer={handleAddPlayer} />
         <Buttons sender="abort" />
       </View>
     </View>

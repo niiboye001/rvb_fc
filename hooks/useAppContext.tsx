@@ -3,6 +3,7 @@ import { createContext, ReactNode, useContext, useState } from "react";
 interface ContextType {
   isShowing: boolean;
   toggleVisibility: () => void;
+  // teams: { label: string; value: string }[] | undefined;
 }
 
 const AppContext = createContext<undefined | ContextType>(undefined);

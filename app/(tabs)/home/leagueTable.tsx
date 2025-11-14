@@ -1,8 +1,10 @@
 import NewPlayerForm from "@/components/NewPlayerForm";
 import SquadList from "@/components/SquadList";
 import Subtitles from "@/components/Subtitles";
+import { api } from "@/convex/_generated/api";
 import useApp from "@/hooks/useAppContext";
 import Ionicons from "@react-native-vector-icons/ionicons";
+import { useQuery } from "convex/react";
 import { LinearGradient } from "expo-linear-gradient";
 import React from "react";
 import { ScrollView, Text, TouchableOpacity, TouchableWithoutFeedback, View } from "react-native";
@@ -12,6 +14,10 @@ import * as colors from "tailwindcss/colors";
 const LeagueTableScreen = () => {
   // const [isShowPlayerForm, setIsShowPlayerForm] = useState<boolean | undefined>(false);
   const { isShowing, toggleVisibility } = useApp();
+
+  // GET ALL THE TEAMS
+  const teams =
+    useQuery(api.teams.getTeams)?.map((team) => ({ label: team.name, value: team._id })) ?? [];
 
   return (
     <TouchableWithoutFeedback>
@@ -58,7 +64,9 @@ const LeagueTableScreen = () => {
             {/* TABLE DATA - FIRST ROW */}
             <View className="flex-row border-b border-slate-100 pb-2">
               <View className="w-[20%]">
-                <Text className="text-slate-600 text-[14px] uppercase font-light">Blue </Text>
+                <Text className="text-slate-600 text-[14px] uppercase font-light">
+                  {teams && teams[0]?.label.slice(0, teams[0]?.label.lastIndexOf(" "))}
+                </Text>
               </View>
               <View className="w-[10%]">
                 <Text className="text-slate-500 text-[13px] uppercase">0</Text>
@@ -89,7 +97,9 @@ const LeagueTableScreen = () => {
             {/* TABLE DATA - SECOND ROW */}
             <View className="flex-row border-b border-slate-100 pb-2">
               <View className="w-[20%]">
-                <Text className="text-slate-600 text-[14px] uppercase font-light">Red</Text>
+                <Text className="text-slate-600 text-[14px] uppercase font-light">
+                  {teams && teams[1]?.label.slice(0, teams[1]?.label.lastIndexOf(" "))}
+                </Text>
               </View>
               <View className="w-[10%]">
                 <Text className="text-slate-500 text-[14px] uppercase">0</Text>

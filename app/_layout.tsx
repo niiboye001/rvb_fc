@@ -1,11 +1,18 @@
 import { AppContextProvider } from "@/hooks/useAppContext";
+import { ConvexProvider, ConvexReactClient } from "convex/react";
 import { Stack } from "expo-router";
 import "../global.css";
 
+const convex = new ConvexReactClient(process.env.EXPO_PUBLIC_CONVEX_URL!, {
+  unsavedChangesWarning: false,
+});
+
 export default function RootLayout() {
   return (
-    <AppContextProvider>
-      <Stack screenOptions={{ headerShown: false }} />;
-    </AppContextProvider>
+    <ConvexProvider client={convex}>
+      <AppContextProvider>
+        <Stack screenOptions={{ headerShown: false }} />;
+      </AppContextProvider>
+    </ConvexProvider>
   );
 }

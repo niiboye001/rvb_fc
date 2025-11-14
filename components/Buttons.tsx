@@ -2,20 +2,23 @@ import useApp from "@/hooks/useAppContext";
 import Ionicons from "@react-native-vector-icons/ionicons";
 import { LinearGradient } from "expo-linear-gradient";
 import React from "react";
-import { Alert, Text, TouchableOpacity, View } from "react-native";
+import { Text, TouchableOpacity, View } from "react-native";
 import * as colors from "tailwindcss/colors";
 
-const Buttons = ({ sender = "" }) => {
+type ButtonType = {
+  sender: "save" | "abort";
+  handleAddPlayer?: () => void;
+};
+
+const Buttons = ({ sender, handleAddPlayer }: ButtonType) => {
   const { toggleVisibility } = useApp();
 
   const handleButton = () => {
     if (sender === "save") {
-      () => {};
-      Alert.alert("Error", "Error 1");
-    } else {
-      toggleVisibility();
-      Alert.alert("Success", "Success!");
+      handleAddPlayer?.();
     }
+
+    toggleVisibility();
   };
 
   return (
