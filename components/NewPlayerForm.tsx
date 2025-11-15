@@ -5,12 +5,9 @@ import { Alert, TextInput, View } from "react-native";
 import Buttons from "./Buttons";
 import Subtitles from "./Subtitles";
 
-// type TeamItemTypes = {
-//   label: string;
-//   value: string;
-// };
+type VisibleType = { handleVisibility: (s: string) => void };
 
-const NewPlayerForm = async () => {
+const NewPlayerForm = ({ handleVisibility }: VisibleType) => {
   const [newPlayer, setNewPlayer] = useState<string | undefined>("");
   const [phone, setPhone] = useState<string | undefined>("");
 
@@ -21,6 +18,10 @@ const NewPlayerForm = async () => {
     try {
       if (newPlayer?.trim() && phone?.trim()) {
         await addPlayer({ name: newPlayer, phone: phone });
+      } else if (newPlayer?.trim()) {
+        await addPlayer({ name: newPlayer, phone: null });
+        // Alert.alert("Error", "Skipped");
+        // return;
       } else {
         return;
       }
@@ -29,8 +30,10 @@ const NewPlayerForm = async () => {
     }
   };
 
+  // useEffect(() => Alert.alert("Start", "In the starting phase."));
+
   return (
-    <View className="px-7 py-5 bg-white my-3 rounded-lg flex flex-col gap-2">
+    <View className="px-7 py-5 bg-white my-2 rounded-lg flex flex-col gap-2">
       <Subtitles subtitle="New player form" />
       <View className="pt-7 pb-3 flex flex-col gap-5">
         <TextInput
@@ -63,8 +66,12 @@ const NewPlayerForm = async () => {
         </View> */}
       </View>
       <View className="flex-row items-center justify-end gap-2">
-        <Buttons sender="save" handleAddPlayer={handleAddPlayer} />
-        <Buttons sender="abort" />
+        <Buttons
+          sender="save"
+          handleAddPlayer={handleAddPlayer}
+          handleVisibility={handleVisibility}
+        />
+        <Buttons sender="abort" handleVisibility={handleVisibility} />
       </View>
     </View>
   );

@@ -1,4 +1,3 @@
-import useApp from "@/hooks/useAppContext";
 import Ionicons from "@react-native-vector-icons/ionicons";
 import { LinearGradient } from "expo-linear-gradient";
 import React from "react";
@@ -8,17 +7,18 @@ import * as colors from "tailwindcss/colors";
 type ButtonType = {
   sender: "save" | "abort";
   handleAddPlayer?: () => void;
+  handleVisibility: (s: string) => void;
 };
 
-const Buttons = ({ sender, handleAddPlayer }: ButtonType) => {
-  const { toggleVisibility } = useApp();
+const Buttons = ({ sender, handleAddPlayer, handleVisibility }: ButtonType) => {
+  // const { toggleVisibility } = useApp();
 
   const handleButton = () => {
     if (sender === "save") {
       handleAddPlayer?.();
     }
 
-    toggleVisibility();
+    handleVisibility("p");
   };
 
   return (
