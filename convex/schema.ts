@@ -27,7 +27,9 @@ export default defineSchema({
   playersTeams: defineTable({
     playerId: v.id("players"),
     teamId: v.id("teams"),
-  }),
+  })
+    .index("playerId_teamId", ["playerId", "teamId"])
+    .index("by_playerId", ["playerId"]),
 
   matches: defineTable({
     homeTeamId: v.id("teams"),

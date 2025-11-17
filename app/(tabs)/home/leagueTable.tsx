@@ -3,36 +3,39 @@ import PlayersScreen from "@/components/PlayersScreen";
 import Subtitles from "@/components/Subtitles";
 import TeamSquad from "@/components/TeamSquad";
 import { api } from "@/convex/_generated/api";
+import useApp from "@/hooks/useAppContext";
 import Ionicons from "@react-native-vector-icons/ionicons";
 import { useQuery } from "convex/react";
 import { LinearGradient } from "expo-linear-gradient";
-import React, { useState } from "react";
+import React from "react";
 import { ScrollView, Text, TouchableOpacity, TouchableWithoutFeedback, View } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import * as colors from "tailwindcss/colors";
 
 const LeagueTableScreen = () => {
+  const { handleVisibility, showNewPlayerForm, showPlayers, showTeamSquad, showUpdateForm } =
+    useApp();
   // const [isShowPlayerForm, setIsShowPlayerForm] = useState<boolean | undefined>(false);
   // const { isShowing, toggleVisibility } = useApp();
-  const [showNewPlayerForm, setShowNewPlayerForm] = useState(false);
-  const [showPlayers, setShowPlayers] = useState(true);
-  const [showTeamSquad, setShowTeamSquad] = useState(false);
+  // const [showNewPlayerForm, setShowNewPlayerForm] = useState(false);
+  // const [showPlayers, setShowPlayers] = useState(true);
+  // const [showTeamSquad, setShowTeamSquad] = useState(false);
 
-  const handleVisibility = (s: string) => {
-    if (s === "np") {
-      setShowNewPlayerForm(true);
-      setShowPlayers(false);
-      setShowTeamSquad(false);
-    } else if (s === "p") {
-      setShowPlayers(true);
-      setShowNewPlayerForm(false);
-      setShowTeamSquad(false);
-    } else {
-      setShowTeamSquad(true);
-      setShowPlayers(false);
-      setShowNewPlayerForm(false);
-    }
-  };
+  // const handleVisibility = (s: string) => {
+  //   if (s === "np") {
+  //     setShowNewPlayerForm(true);
+  //     setShowPlayers(false);
+  //     setShowTeamSquad(false);
+  //   } else if (s === "p") {
+  //     setShowPlayers(true);
+  //     setShowNewPlayerForm(false);
+  //     setShowTeamSquad(false);
+  //   } else {
+  //     setShowTeamSquad(true);
+  //     setShowPlayers(false);
+  //     setShowNewPlayerForm(false);
+  //   }
+  // };
 
   // GET ALL THE TEAMS
   const teams =
@@ -185,6 +188,7 @@ const LeagueTableScreen = () => {
 
           {showPlayers && <PlayersScreen />}
           {showTeamSquad && <TeamSquad />}
+          {/* {showUpdateForm && <PlayerUpdateForm />} */}
           {showNewPlayerForm && <NewPlayerForm handleVisibility={handleVisibility} />}
         </ScrollView>
       </KeyboardAwareScrollView>
