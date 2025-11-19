@@ -74,16 +74,14 @@ const PlayerUpdateForm = ({ player, setRecordId }: PlayerType) => {
       }
 
       const result = await addPlayerToTeam({ playerId: playerId, teamId: team });
-      //   Alert.alert("Info", result?.toString());
 
-      //   if (result && result === "existing") {
-      //     // Alert.alert("Info", "Player already belongs to this team.");
-      //     setRecordId(undefined);
-      //     return;
-      //   }
-    } else {
-      setRecordId(undefined);
+      if (result) {
+        setRecordId(undefined);
+        return;
+      }
     }
+
+    setRecordId(undefined);
   };
 
   return (

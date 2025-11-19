@@ -1,13 +1,22 @@
+import { api } from "@/convex/_generated/api";
 import Ionicons from "@react-native-vector-icons/ionicons";
+import { useQuery } from "convex/react";
 import React from "react";
 import { Text, View } from "react-native";
 import * as colors from "tailwindcss/colors";
 import BackgroundCard from "./BackgroundCard";
+import LoadingSpinner from "./LoadingSpinner";
+import PlayerNameRow from "./PlayerNameRow";
 
 const TeamSquad = () => {
-  const teams = [];
+  const teamSquad = useQuery(api.players.getTeamsWithPlayers);
 
-  if (teams.length === 0)
+  const isData = teamSquad?.[0].players.length === 0 && teamSquad?.[1].players.length === 0;
+  const isLoading = teamSquad === undefined;
+
+  if (isLoading) return <LoadingSpinner />;
+
+  if (isData) {
     return (
       <View className="bg-white p-5 flex-col items-center justify-center gap-3 h-72 rounded-lg mt-3">
         <Ionicons name="warning" size={35} color={colors.slate[300]} />
@@ -16,15 +25,26 @@ const TeamSquad = () => {
         </Text>
       </View>
     );
+  }
 
   return (
     <BackgroundCard gap={true} title="team squad">
-      <View className="flex-row justify-between pt-5">
-        <View className="">
-          <Text className="pr-1 uppercase text[15px] text-slate-500 font-semibold">Blue Team</Text>
+      <View className="flex-row justify-between gap-10 pt-5">
+        <View className="flex-col w-[50%]">
+          <Text className="pr-1 uppercase text-[12px] text-blue-600 mb-3">
+            {teamSquad?.[0].team?.name}
+          </Text>
+          {teamSquad?.[0].players.map((player, index) => (
+            <PlayerNameRow key={player?._id} counter={index + 1} playerName={player?.name} />
+          ))}
         </View>
-        <View className="">
-          <Text className="pr-1 uppercase text[15px] text-slate-500 font-semibold">Red Team</Text>
+        <View className="flex-col w-[50%]">
+          <Text className="pr-1 uppercase text-[12px] text-red-600 mb-3">
+            {teamSquad?.[1].team?.name}
+          </Text>
+          {teamSquad?.[1].players.map((player, index) => (
+            <PlayerNameRow key={player?._id} counter={index + 1} playerName={player?.name} />
+          ))}
         </View>
       </View>
     </BackgroundCard>

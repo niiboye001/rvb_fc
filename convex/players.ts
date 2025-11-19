@@ -44,6 +44,7 @@ export const updatePlayer = mutation({
   },
 });
 
+// ASSIGN PLAYER TO TEAM
 export const AssignPlayerToTeam = mutation({
   args: { playerId: v.id("players"), teamId: v.id("teams") },
   handler: async ({ db }, { playerId, teamId }) => {
@@ -87,4 +88,49 @@ export const AssignPlayerToTeam = mutation({
   },
 });
 
-// export const updatePlayerTeam = mutation({args: {teamId}});
+export const getTeamsWithPlayers = query({
+  args: {},
+  handler: async (context) => {
+    // 1. Get the year document
+    // const year = await context.db.get(yearId);
+    // if (!year) return [];
+
+    const currYear = new Date().getFullYear().toString();
+
+    const currYearDetails = await context.db
+      .query("years")
+      .filter((q) => q.eq(q.field("year"), currYear))
+      .first();
+
+    // if (currYearDetails) {
+    //   const currYearId = currYearDetails._id;
+    // }
+
+    if (!currYearDetails) return;
+
+    // 2. Load all teams for that year
+    const teamSquad = await Promise.all(
+      currYearDetails.teamIds.map(async (teamId) => {
+        // 3. Query the playersTeams table for players in this team & year
+        const playerLinks = await context.db
+          .query("playersTeams")
+          .withIndex("by_teamId", (q) => q.eq("teamId", teamId))
+          .filter((q) => q.eq(q.field("yearId"), currYearDetails._id))
+          .collect();
+
+        // 4. Fetch the actual player docs
+        const players = await Promise.all(playerLinks.map((link) => context.db.get(link.playerId)));
+
+        return {
+          teamId,
+          team: await context.db.get(teamId),
+          players: players.filter(Boolean), // remove nulls
+        };
+      })
+    );
+
+    console.log(teamSquad);
+
+    return teamSquad;
+  },
+});
