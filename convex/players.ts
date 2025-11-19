@@ -47,16 +47,44 @@ export const updatePlayer = mutation({
 export const AssignPlayerToTeam = mutation({
   args: { playerId: v.id("players"), teamId: v.id("teams") },
   handler: async ({ db }, { playerId, teamId }) => {
-    const isComboExisting = await db
-      .query("playersTeams")
-      .withIndex("playerId_teamId", (q) => q.eq("playerId", playerId).eq("teamId", teamId))
+    const currYear = new Date().getFullYear().toString();
+
+    const currYearDetails = await db
+      .query("years")
+      .filter((q) => q.eq(q.field("year"), currYear))
       .first();
 
-    // if (isComboExisting) throw new Error("Player already belongs to this team.");
-    if (isComboExisting) return "existing";
+    if (!currYearDetails?.teamIds.includes(teamId)) {
+      throw new Error("No year found for this team");
+    }
 
-    const comboId = await db.insert("playersTeams", { playerId, teamId });
+    // 2. Find if this player already has a team in this same year
+    const existingRelation = await db
+      .query("playersTeams")
+      .filter((q) =>
+        q.or(
+          q.and(
+            q.eq(q.field("playerId"), playerId),
+            q.eq(q.field("teamId"), teamId),
+            q.eq(q.field("yearId"), currYearDetails.year)
+          ),
+          q.and(q.eq(q.field("playerId"), playerId), q.eq(q.field("yearId"), currYearDetails._id))
+        )
+      )
+      .first();
 
-    return comboId;
+    if (!existingRelation) {
+      return await db.insert("playersTeams", {
+        playerId: playerId,
+        teamId: teamId,
+        yearId: currYearDetails._id,
+      });
+    }
+
+    return await db.patch(existingRelation._id, {
+      teamId: teamId,
+    });
   },
 });
+
+// export const updatePlayerTeam = mutation({args: {teamId}});

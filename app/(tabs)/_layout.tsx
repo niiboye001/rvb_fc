@@ -1,9 +1,17 @@
+import { api } from "@/convex/_generated/api";
 import { Ionicons } from "@react-native-vector-icons/ionicons";
+import { useMutation } from "convex/react";
 import { Tabs } from "expo-router";
-import React from "react";
+import React, { useEffect } from "react";
 import { Text, View } from "react-native";
 
 const BottomTabsLayout = () => {
+  const ensureYear = useMutation(api.teams.ensureYearExists);
+
+  useEffect(() => {
+    ensureYear();
+  }, []);
+
   return (
     <>
       <View className="pt-[60px] pb-[30px] bg-white px-7">

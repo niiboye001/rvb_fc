@@ -8,7 +8,7 @@ import Ionicons from "@react-native-vector-icons/ionicons";
 import { useQuery } from "convex/react";
 import { LinearGradient } from "expo-linear-gradient";
 import React from "react";
-import { ScrollView, Text, TouchableOpacity, TouchableWithoutFeedback, View } from "react-native";
+import { Pressable, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import * as colors from "tailwindcss/colors";
 
@@ -42,7 +42,7 @@ const LeagueTableScreen = () => {
     useQuery(api.teams.getTeams)?.map((team) => ({ label: team.name, value: team._id })) ?? [];
 
   return (
-    <TouchableWithoutFeedback>
+    <Pressable>
       <KeyboardAwareScrollView
         contentContainerStyle={{ flexGrow: 1, justifyContent: "center", padding: 10 }}
         keyboardShouldPersistTaps="handled"
@@ -192,7 +192,7 @@ const LeagueTableScreen = () => {
           {showNewPlayerForm && <NewPlayerForm handleVisibility={handleVisibility} />}
         </ScrollView>
       </KeyboardAwareScrollView>
-    </TouchableWithoutFeedback>
+    </Pressable>
   );
 };
 

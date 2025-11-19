@@ -7,9 +7,9 @@ export default defineSchema({
   }),
 
   years: defineTable({
-    name: v.string(),
+    year: v.string(),
     teamIds: v.array(v.id("teams")),
-  }),
+  }).index("teamIds", ["teamIds"]),
 
   seasons: defineTable({
     season: v.string(),
@@ -17,7 +17,7 @@ export default defineSchema({
     endDate: v.optional(v.string()),
     status: v.optional(v.string()),
     yearId: v.id("years"),
-  }),
+  }).index("by_yearId", ["yearId"]),
 
   players: defineTable({
     name: v.string(),
@@ -27,9 +27,12 @@ export default defineSchema({
   playersTeams: defineTable({
     playerId: v.id("players"),
     teamId: v.id("teams"),
+    yearId: v.id("years"),
   })
     .index("playerId_teamId", ["playerId", "teamId"])
-    .index("by_playerId", ["playerId"]),
+    .index("by_playerId", ["playerId"])
+    .index("by_teamId", ["teamId"])
+    .index("by_yearId", ["yearId"]),
 
   matches: defineTable({
     homeTeamId: v.id("teams"),
@@ -44,8 +47,10 @@ export default defineSchema({
     playerId: v.id("players"),
     matchId: v.id("matches"),
     teamId: v.id("teams"),
-    season: v.id("seasons"),
     goals: v.optional(v.number()),
     assists: v.optional(v.number()),
-  }),
+  })
+    .index("by_playerId", ["playerId"])
+    .index("by_matchId", ["matchId"])
+    .index("by_teamId", ["teamId"]),
 });

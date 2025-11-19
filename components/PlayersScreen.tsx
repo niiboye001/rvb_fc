@@ -9,7 +9,7 @@ import LoadingSpinner from "./LoadingSpinner";
 import PlayerUpdateForm from "./PlayerUpdateForm";
 import RowCard from "./RowCard";
 
-type PlayerType = Doc<"players">;
+type PlayerType = Doc<"players"> & { team: Doc<"teams"> };
 type PlayerWithTeamType = Doc<"players"> & { team: Doc<"teams"> };
 
 const PlayersScreen = () => {

@@ -4,7 +4,7 @@ import useApp from "@/hooks/useAppContext";
 import Ionicons from "@react-native-vector-icons/ionicons";
 import { useMutation, useQuery } from "convex/react";
 import { LinearGradient } from "expo-linear-gradient";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Alert, Text, TouchableOpacity, View } from "react-native";
 import DropDownPicker from "react-native-dropdown-picker";
 import { TextInput } from "react-native-gesture-handler";
@@ -12,7 +12,7 @@ import * as colors from "tailwindcss/colors";
 import BackgroundCard from "./BackgroundCard";
 
 interface PlayerType {
-  player: Doc<"players"> | null;
+  player: (Doc<"players"> & { team: Doc<"teams"> }) | null;
   setRecordId: React.Dispatch<React.SetStateAction<Id<"players"> | undefined>>;
 }
 
@@ -31,14 +31,23 @@ const PlayerUpdateForm = ({ player, setRecordId }: PlayerType) => {
   const updatePlayer = useMutation(api.players.updatePlayer);
   const addPlayerToTeam = useMutation(api.players.AssignPlayerToTeam);
 
-  //   useEffect(() => {
-  //     setPlayerDetails(player);
-  //   });
   const teams: TeamType[] =
     useQuery(api.teams.getTeams)?.map((team) => ({
       label: team.name,
       value: team._id,
     })) ?? [];
+
+  useEffect(() => {
+    if (teams?.length > 0 && player?.team && player.team._id) {
+      teams.forEach((t) => {
+        if (player?.team._id !== null) {
+          t.value === player?.team._id ? setTeam(t.value) : "";
+        }
+      });
+
+      //   setTeam(teams[0].value);
+    }
+  }, []);
 
   const handleCancel = () => {
     setRecordId(undefined);
@@ -59,16 +68,21 @@ const PlayerUpdateForm = ({ player, setRecordId }: PlayerType) => {
     });
 
     if (updated) {
-      if (!playerId || !team) return;
-
-      const result = await addPlayerToTeam({ playerId: playerId, teamId: team });
-
-      if (result && result === "existing") {
-        Alert.alert("Info", "Player already belongs to this team.");
+      if (!team) {
+        setRecordId(undefined);
         return;
       }
 
-      Alert.alert("Success", "Player updated successfully!");
+      const result = await addPlayerToTeam({ playerId: playerId, teamId: team });
+      //   Alert.alert("Info", result?.toString());
+
+      //   if (result && result === "existing") {
+      //     // Alert.alert("Info", "Player already belongs to this team.");
+      //     setRecordId(undefined);
+      //     return;
+      //   }
+    } else {
+      setRecordId(undefined);
     }
   };
 

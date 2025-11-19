@@ -24,7 +24,6 @@ const RowCard = ({ player, num }: DetailsType) => {
         <Text
           className={`text-[15px] ${teamName === "Blue" && "text-blue-500"} ${teamName === "Red" && "text-red-500"} text-slate-500`}>
           {player.team?.name ? teamName : "-"}
-          {/* {teams && teams[0]?.label.slice(0, teams[0]?.label.lastIndexOf(" "))} */}
         </Text>
       </View>
       <View className="flex-row items-center w-[30%]">
@@ -32,10 +31,6 @@ const RowCard = ({ player, num }: DetailsType) => {
           {player.phone === "" ? "—" : player.phone}
         </Text>
       </View>
-
-      {/* <Text className="text-[15px] text-slate-500">{name}</Text>
-        <Text className="text-[15px] text-slate-500">-</Text>
-        <Text className="text-[15px] text-slate-500">{phoneNum === "" ? "—" : phoneNum}</Text> */}
     </View>
   );
 };
