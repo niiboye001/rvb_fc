@@ -1,4 +1,5 @@
 import { api } from "@/convex/_generated/api";
+import { Id } from "@/convex/_generated/dataModel";
 import { useMutation, useQuery } from "convex/react";
 import React, { useState } from "react";
 import { Alert, TextInput, View } from "react-native";
@@ -9,7 +10,7 @@ import Subtitles from "./Subtitles";
 
 // TYPES
 type VisibleType = { handleVisibility: (s: string) => void };
-type TeamType = { label: string; value: string };
+type TeamType = { label: string; value: Id<"teams"> };
 
 const NewPlayerForm = ({ handleVisibility }: VisibleType) => {
   const [newPlayer, setNewPlayer] = useState<string | undefined>("");
@@ -24,7 +25,7 @@ const NewPlayerForm = ({ handleVisibility }: VisibleType) => {
 
   // FOR THE DROP DOWN PICKER
   const [open, setOpen] = useState(false);
-  const [team, setTeam] = useState<string | null>(null);
+  const [team, setTeam] = useState<Id<"teams"> | null>(null);
 
   // const prevValue = useRef<string | null>(null);
 
@@ -35,13 +36,19 @@ const NewPlayerForm = ({ handleVisibility }: VisibleType) => {
 
   // ADD NEW PLAYER
   const addPlayer = useMutation(api.players.addPlayer);
+  const addPlayerToTeam = useMutation(api.players.AssignPlayerToTeam);
 
   const handleAddPlayer = async () => {
     try {
       if (newPlayer?.trim() && phone?.trim()) {
         await addPlayer({ name: newPlayer, phone: phone });
       } else if (newPlayer?.trim()) {
-        await addPlayer({ name: newPlayer, phone: null });
+        const newPlayerId = await addPlayer({ name: newPlayer, phone: null });
+
+        if (!newPlayerId || !team) return;
+
+        const feedback = await addPlayerToTeam({ playerId: newPlayerId, teamId: team });
+
         // Alert.alert("Error", "Skipped");
         // return;
       } else {

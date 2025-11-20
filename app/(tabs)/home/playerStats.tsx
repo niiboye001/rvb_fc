@@ -1,10 +1,11 @@
-import { Text, View } from "react-native";
+import BackgroundCard from "@/components/BackgroundCard";
+import { Text } from "react-native";
 
 const PlayerStatsScreen = () => {
   return (
-    <View>
+    <BackgroundCard title="player stats" gap={false}>
       <Text>PlayerStatsScreen</Text>
-    </View>
+    </BackgroundCard>
   );
 };
 

@@ -13,8 +13,8 @@ export default defineSchema({
 
   seasons: defineTable({
     season: v.string(),
-    startDate: v.optional(v.string()),
-    endDate: v.optional(v.string()),
+    startMonth: v.optional(v.string()),
+    endMonth: v.optional(v.string()),
     status: v.optional(v.string()),
     yearId: v.id("years"),
   }).index("by_yearId", ["yearId"]),

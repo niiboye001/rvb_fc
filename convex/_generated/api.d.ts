@@ -9,6 +9,9 @@
  */
 
 import type * as players from "../players.js";
+import type * as schedule from "../schedule.js";
+import type * as seasons from "../seasons.js";
+import type * as seasonsAuto from "../seasonsAuto.js";
 import type * as teams from "../teams.js";
 
 import type {
@@ -19,6 +22,9 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   players: typeof players;
+  schedule: typeof schedule;
+  seasons: typeof seasons;
+  seasonsAuto: typeof seasonsAuto;
   teams: typeof teams;
 }>;
 
