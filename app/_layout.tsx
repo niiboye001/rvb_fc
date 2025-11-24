@@ -24,9 +24,9 @@ export default function RootLayout() {
                   presentation: "formSheet",
                   gestureDirection: "vertical",
                   animation: "default",
-                  sheetGrabberVisible: true,
+                  sheetGrabberVisible: false,
                   sheetInitialDetentIndex: 0,
-                  sheetAllowedDetents: [0.5, 1.0],
+                  sheetAllowedDetents: [0.7],
                 }}
               />
               <Stack.Screen
@@ -35,9 +35,9 @@ export default function RootLayout() {
                   presentation: "formSheet",
                   gestureDirection: "vertical",
                   animation: "default",
-                  sheetGrabberVisible: true,
+                  sheetGrabberVisible: false,
                   sheetInitialDetentIndex: 0,
-                  sheetAllowedDetents: [0.5, 1.0],
+                  sheetAllowedDetents: [0.7],
                 }}
               />
             </Stack>
