@@ -43,6 +43,15 @@ export default defineSchema({
     awayScore: v.optional(v.number()),
   }),
 
+  bookings: defineTable({
+    matchId: v.id("matches"),
+    playerId: v.id("players"),
+    teamId: v.id("teams"),
+    cardType: v.union(v.literal("yellow"), v.literal("red"), v.literal("second_yellow")),
+  })
+    .index("by_matchId", ["matchId"])
+    .index("by_playerId", ["playerId"]),
+
   stats: defineTable({
     playerId: v.id("players"),
     matchId: v.id("matches"),

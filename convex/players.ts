@@ -120,17 +120,61 @@ export const getTeamsWithPlayers = query({
 
         // 4. Fetch the actual player docs
         const players = await Promise.all(playerLinks.map((link) => context.db.get(link.playerId)));
-
+        // console.log(players);
         return {
-          teamId,
           team: await context.db.get(teamId),
           players: players.filter(Boolean), // remove nulls
         };
       })
     );
 
-    console.log(teamSquad);
+    // console.log(teamSquad);
 
     return teamSquad;
+  },
+});
+
+export const getTeamPlayers = query({
+  args: {},
+  handler: async (ctx) => {
+    const currYear = new Date().getFullYear().toString();
+
+    const currYearDetails = await ctx.db
+      .query("years")
+      .filter((q) => q.eq(q.field("year"), currYear))
+      .first();
+
+    if (!currYearDetails) return [];
+
+    const rows = [];
+
+    for (const teamId of currYearDetails.teamIds) {
+      const team = await ctx.db.get(teamId);
+      if (!team) continue;
+
+      const playerLinks = await ctx.db
+        .query("playersTeams")
+        .withIndex("by_teamId", (q) => q.eq("teamId", teamId))
+        .filter((q) => q.eq(q.field("yearId"), currYearDetails._id))
+        .collect();
+
+      const players = await Promise.all(playerLinks.map((l) => ctx.db.get(l.playerId)));
+
+      for (const player of players) {
+        if (!player) continue;
+
+        rows.push({
+          playerId: player._id,
+          playerName: player.name,
+          teamId: team._id,
+          teamName: team.name,
+        });
+      }
+    }
+
+    // 🔥 SORT BY PLAYER NAME
+    rows.sort((a, b) => a.playerName.localeCompare(b.playerName));
+
+    return rows;
   },
 });

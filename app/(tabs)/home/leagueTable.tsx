@@ -1,4 +1,6 @@
+import LoadingSpinner from "@/components/LoadingSpinner";
 import NewPlayerForm from "@/components/NewPlayerForm";
+import NoStandings from "@/components/NoStandings";
 import PlayersScreen from "@/components/PlayersScreen";
 import Subtitles from "@/components/Subtitles";
 import TeamSquad from "@/components/TeamSquad";
@@ -43,7 +45,11 @@ const LeagueTableScreen = () => {
 
   const standings = useQuery(api.seasons.getSeasonStandings);
 
-  if (!standings) return;
+  // if (!standings) return;
+
+  const isLoading = standings === undefined;
+
+  if (isLoading) return <LoadingSpinner title="standings" />;
 
   return (
     <Pressable>
@@ -87,44 +93,11 @@ const LeagueTableScreen = () => {
               </View>
             </View>
 
-            {/* TABLE DATA - FIRST ROW */}
-            {/* <View className="flex-row border-b border-slate-100 pb-2">
-              <View className="w-[20%]">
-                <Text className="text-slate-600 text-[14px] uppercase font-light">
-                  {standings[0]?.team?.name.slice(0, teams[0]?.label.lastIndexOf(" "))}
-                </Text>
-              </View>
-              <View className="w-[10%]">
-                <Text className="text-slate-500 text-[13px] uppercase">0</Text>
-              </View>
-              <View className="w-[10%]">
-                <Text className="text-slate-500 text-[13px] uppercase">0</Text>
-              </View>
-              <View className="w-[10%]">
-                <Text className="text-slate-500 text-[13px] uppercase">0</Text>
-              </View>
-              <View className="w-[10%]">
-                <Text className="text-slate-500 text-[13px] uppercase">0</Text>
-              </View>
-              <View className="w-[10%]">
-                <Text className="text-slate-500 text-[13px] uppercase">0</Text>
-              </View>
-              <View className="w-[10%]">
-                <Text className="text-slate-500 text-[13px] uppercase">0</Text>
-              </View>
-              <View className="w-[10%]">
-                <Text className="text-slate-500 text-[13px] uppercase">0</Text>
-              </View>
-              <View className="w-[10%]">
-                <Text className="text-slate-600 text-[13px] font-extrabold">0</Text>
-              </View>
-            </View> */}
-
-            {/* TABLE DATA - SECOND ROW */}
-            <View className="flex-col pb-2 gap-2">
-              {standings.map((s) => (
-                <>
-                  <View className="flex-row pb-2 border-b border-slate-100">
+            {standings.length === 0 ?
+              <NoStandings />
+            : <View className="flex-col pb-2 gap-2">
+                {standings.filter(Boolean).map((s) => (
+                  <View key={s.teamId} className="flex-row pb-2 border-b border-slate-100">
                     <View className="w-[20%]">
                       <Text
                         className={`${s.team?.name.toLocaleLowerCase() === "blue team" ? "text-blue-500" : "text-red-500"} text-[14px] uppercase font-semibold`}>
@@ -132,35 +105,35 @@ const LeagueTableScreen = () => {
                       </Text>
                     </View>
                     <View className="w-[10%]">
-                      <Text className="text-slate-400 text-[14px] uppercase">{s.played}</Text>
+                      <Text className="text-slate-500 text-[14px] uppercase">{s.played}</Text>
                     </View>
                     <View className="w-[10%]">
-                      <Text className="text-slate-400 text-[14px] uppercase">{s.wins}</Text>
+                      <Text className="text-slate-500 text-[14px] uppercase">{s.wins}</Text>
                     </View>
                     <View className="w-[10%]">
-                      <Text className="text-slate-400 text-[14px] uppercase">{s.draws}</Text>
+                      <Text className="text-slate-500 text-[14px] uppercase">{s.draws}</Text>
                     </View>
                     <View className="w-[10%]">
-                      <Text className="text-slate-400 text-[14px] uppercase">{s.losses}</Text>
+                      <Text className="text-slate-500 text-[14px] uppercase">{s.losses}</Text>
                     </View>
                     <View className="w-[10%]">
-                      <Text className="text-slate-400 text-[14px] uppercase">{s.goalsFor}</Text>
+                      <Text className="text-slate-500 text-[14px] uppercase">{s.goalsFor}</Text>
                     </View>
                     <View className="w-[10%]">
-                      <Text className="text-slate-400 text-[14px] uppercase">{s.goalsAgainst}</Text>
+                      <Text className="text-slate-500 text-[14px] uppercase">{s.goalsAgainst}</Text>
                     </View>
                     <View className="w-[10%]">
-                      <Text className="text-slate-400 text-[14px] uppercase">
+                      <Text className="text-slate-500 text-[14px] uppercase">
                         {s.goalDifference}
                       </Text>
                     </View>
                     <View className="w-[10%]">
-                      <Text className="text-slate-400 text-[14px] uppercase">{s.points}</Text>
+                      <Text className="text-slate-500 text-[14px] uppercase">{s.points}</Text>
                     </View>
                   </View>
-                </>
-              ))}
-            </View>
+                ))}
+              </View>
+            }
           </View>
 
           <View className="mt-5 flex flex-row items-center justify-between">
