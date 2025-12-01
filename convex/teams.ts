@@ -1,15 +1,9 @@
 import { mutation, query } from "./_generated/server";
 
 export const getTeams = query({
-  // handler: async (context) => {
-  //   const teams = await context.db.query("teams").collect();
-
-  //   return teams;
-  // },
   handler: async (context) => {
     const currentYear = new Date().getFullYear().toString();
 
-    // 1. Get the current year document
     const yearDoc = await context.db
       .query("years")
       .filter((q) => q.eq(q.field("year"), currentYear))
@@ -17,15 +11,15 @@ export const getTeams = query({
 
     if (!yearDoc) return [];
 
-    // 2. Resolve each teamId to an actual team document
     const teams = [];
 
     for (const teamId of yearDoc.teamIds) {
       const team = await context.db.get(teamId);
+
       if (team) teams.push(team);
     }
 
-    return teams; // each has: { _id, name }
+    return teams;
   },
 });
 

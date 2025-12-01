@@ -120,38 +120,199 @@ export const getTeamsWithPlayers = query({
   },
 });
 
-export const getAllPlayersWithTeams = query({
+export const getTeamPlayers = query({
   args: {},
-  handler: async ({ db }) => {
-    const allPlayers = await db.query("players").collect();
+  handler: async (ctx) => {
+    const currYear = new Date().getFullYear().toString();
 
-    const playersWithTeams = await Promise.all(
-      allPlayers.map(async (player) => {
-        const link = await db
-          .query("playersTeams")
-          .withIndex("by_playerId", (q) => q.eq("playerId", player._id))
-          .first();
+    const currYearDetails = await ctx.db
+      .query("years")
+      .filter((q) => q.eq(q.field("year"), currYear))
+      .first();
 
-        let team = null;
+    if (!currYearDetails) return [];
 
-        if (link) {
-          team = await db.get(link.teamId);
-        }
+    const rows = [];
 
-        return {
+    for (const teamId of currYearDetails.teamIds) {
+      const team = await ctx.db.get(teamId);
+      if (!team) continue;
+
+      const playerLinks = await ctx.db
+        .query("playersTeams")
+        .withIndex("by_teamId", (q) => q.eq("teamId", teamId))
+        .filter((q) => q.eq(q.field("yearId"), currYearDetails._id))
+        .collect();
+
+      const players = await Promise.all(playerLinks.map((l) => ctx.db.get(l.playerId)));
+
+      for (const player of players) {
+        if (!player) continue;
+
+        rows.push({
           playerId: player._id,
           playerName: player.name,
-          teamId: team?._id ?? null,
-          teamName: team?.name ?? null,
-        };
-      })
-    );
+          teamId: team._id,
+          teamName: team.name,
+        });
+      }
+    }
 
-    playersWithTeams.sort((a, b) => a.playerName.localeCompare(b.playerName));
+    rows.sort((a, b) => a.playerName.localeCompare(b.playerName));
 
-    return playersWithTeams;
+    return rows;
   },
 });
+
+export const getCurrentMatchBookings = query({
+  args: {},
+  handler: async (ctx) => {
+    // 1. Get all bookings sorted by creation time desc
+    const bookings = await ctx.db.query("bookings").order("desc").collect();
+
+    if (bookings.length === 0) return [];
+
+    // 2. Determine the latest match by the most recent booking
+    const latestMatchId = bookings[0].matchId;
+
+    // 3. Get all bookings for that match
+    const matchBookings = await ctx.db
+      .query("bookings")
+      .filter((q) => q.eq(q.field("matchId"), latestMatchId))
+      .collect();
+
+    // console.log(matchBookings);
+
+    const result = [];
+
+    for (const booking of matchBookings) {
+      const player = await ctx.db.get(booking.playerId);
+      if (!player) continue;
+
+      // Get team from playersTeams table
+      const playersTeam = await ctx.db
+        .query("playersTeams")
+        .withIndex("by_playerId", (q) => q.eq("playerId", booking.playerId))
+        .first();
+
+      let teamName = null;
+      if (playersTeam) {
+        const team = await ctx.db.get(playersTeam.teamId);
+        teamName = team?.name ?? null;
+      }
+
+      result.push({
+        bookingId: booking._id,
+        playerId: booking.playerId,
+        playerName: player.name,
+        teamName,
+        cardType: booking.cardType,
+      });
+    }
+
+    return result;
+  },
+});
+
+// export const getBookingsForCurrentMatch = query({
+//   args: {},
+
+//   handler: async (ctx) => {
+//     const { db } = ctx;
+
+//     // Fetch all matches
+//     const matches = await db.query("matches").collect();
+//     if (matches.length === 0) return {};
+
+//     // Sort matches by date (latest first)
+//     const validMatches = matches.filter((m) => m.date);
+
+//     if (validMatches.length === 0) return {};
+
+//     // console.log(validMatches);
+
+//     const sorted = validMatches.sort(
+//       (a, b) => new Date(b.date!).getTime() - new Date(a.date!).getTime()
+//     );
+
+//     const currentMatch = sorted[0];
+//     const matchId = currentMatch._id;
+
+//     // Fetch all bookings for this match
+//     const bookings = await db
+//       .query("bookings")
+//       .withIndex("by_matchId", (q) => q.eq("matchId", matchId))
+//       .collect();
+
+//     if (bookings.length === 0) return {};
+
+//     // Fetch only the players involved
+//     const playerIds = [...new Set(bookings.map((b) => b.playerId))];
+
+//     const players = await Promise.all(playerIds.map((id) => db.get(id)));
+
+//     const playerNameMap = new Map(players.filter(Boolean).map((p) => [p!._id, p!.name]));
+//     // console.log(playerNameMap);
+
+//     // Build response grouped by player name
+//     const result: Record<string, string[]> = {};
+
+//     for (const b of bookings) {
+//       const name = playerNameMap.get(b.playerId);
+//       if (!name) continue;
+
+//       if (!result[name]) {
+//         result[name] = [];
+//       }
+
+//       result[name].push(b.cardType);
+//     }
+
+//     // console.log(result);
+
+//     return result;
+//   },
+// });
+
+// export const getAllPlayersWithTeams = query({
+//   args: {},
+//   handler: async ({ db }) => {
+//     const allPlayers = await db.query("players").collect();
+
+//     const playersWithTeams = await Promise.all(
+//       allPlayers.map(async (player) => {
+//         const link = await db
+//           .query("playersTeams")
+//           .withIndex("by_playerId", (q) => q.eq("playerId", player._id))
+//           .first();
+
+//         let team = null;
+
+//         if (link) {
+//           team = await db.get(link.teamId);
+//         }
+
+//         if (!team?._id) {
+//           return {
+//             playerId: player._id,
+//             playerName: player.name,
+//           };
+//         }
+
+//         return {
+//           playerId: player._id,
+//           playerName: player.name,
+//           teamId: team?._id ?? null,
+//           teamName: team?.name ?? null,
+//         };
+//       })
+//     );
+
+//     playersWithTeams.sort((a, b) => a.playerName.localeCompare(b.playerName));
+
+//     return playersWithTeams;
+//   },
+// });
 
 // export const getTeamPlayers = query({
 //   args: {},

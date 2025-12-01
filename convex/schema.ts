@@ -49,17 +49,30 @@ export default defineSchema({
     teamId: v.id("teams"),
     cardType: v.union(v.literal("yellow"), v.literal("red"), v.literal("second_yellow")),
   })
+    .index("by_match_player", ["playerId", "matchId"])
     .index("by_matchId", ["matchId"])
     .index("by_playerId", ["playerId"]),
 
-  stats: defineTable({
-    playerId: v.id("players"),
+  goalEvents: defineTable({
     matchId: v.id("matches"),
     teamId: v.id("teams"),
-    goals: v.optional(v.number()),
-    assists: v.optional(v.number()),
+    scorerId: v.id("players"),
+    assisterId: v.optional(v.id("players")),
+    seasonId: v.id("seasons"),
   })
-    .index("by_playerId", ["playerId"])
-    .index("by_matchId", ["matchId"])
-    .index("by_teamId", ["teamId"]),
+    .index("by_scorer", ["scorerId"])
+    .index("by_assister", ["assisterId"])
+    .index("by_match", ["matchId"])
+    .index("by_season", ["seasonId"]),
+
+  // stats: defineTable({
+  //   playerId: v.id("players"),
+  //   matchId: v.id("matches"),
+  //   teamId: v.id("teams"),
+  //   goals: v.optional(v.number()),
+  //   assists: v.optional(v.number()),
+  // })
+  //   .index("by_playerId", ["playerId"])
+  //   .index("by_matchId", ["matchId"])
+  //   .index("by_teamId", ["teamId"]),
 });
