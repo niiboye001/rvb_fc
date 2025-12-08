@@ -12,13 +12,14 @@ import { Id } from "@/convex/_generated/dataModel";
 import Ionicons from "@react-native-vector-icons/ionicons";
 import { useMutation, useQuery } from "convex/react";
 import { LinearGradient } from "expo-linear-gradient";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import * as colors from "tailwindcss/colors";
 // import util from "util";
 
 type TeamType = { label: string; value: Id<"teams"> };
+
 type PlayerBookingGroup = {
   bookingId: Id<"bookings">;
   playerId: Id<"players">;
@@ -27,17 +28,83 @@ type PlayerBookingGroup = {
   cards: string[];
 };
 
+export interface MatchDetailType {
+  date: string | undefined;
+  homeTeam: {
+    tname: string;
+    score: number;
+    gc: {
+      scorer: string | null;
+      assister: string | null;
+      gtype: string | null;
+    }[];
+    bookings: {
+      book: string | null;
+      ctype: "yellow" | "red" | "second_yellow";
+    }[];
+  };
+  awayTeam: {
+    tname: string;
+    score: number;
+    gc: {
+      scorer: string | null;
+      assister: string | null;
+      gtype: string | null;
+    }[];
+    bookings: {
+      book: string | null;
+      ctype: "yellow" | "red" | "second_yellow";
+    }[];
+  };
+}
+
+type CardType = "yellow" | "red" | "second_yellow";
+
+interface Goal {
+  scorer: string | null;
+  assister: string | null;
+  gtype: string | null; // e.g. "normal" | "penalty" | "own_goal" | null
+}
+
+// interface TeamDetails {
+//   tname: string;
+//   score: number;
+//   gc: Goal[];
+//   bookings: { book: string | null; ctype: CardType }[];
+// }
+
+// interface MatchDetails {
+//   date: string | undefined;
+//   homeTeam: TeamDetails;
+//   awayTeam: TeamDetails;
+// }
+
+interface GroupedGoalOutput {
+  scorer: string;
+  assister: string | null;
+  count: number;
+  gtype?: string; // penalty, own_goal, normal goal
+}
+
 const CurrentResultScreen = () => {
   const [showScorelineForm, setShowScorelineForm] = useState(false);
   const [showBookingsForm, setShowBookingsForm] = useState(false);
   const [showGCForm, setShowGCForm] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
+  const [currentMatch, setCurrentMatch] = useState<MatchDetailType | undefined>(undefined);
+  const [loadingMatch, setLoadingMatch] = useState(false);
 
-  const currMatch = useQuery(api.seasons.getCurrentMatchResult);
+  // const currMatch = useQuery(api.seasons.getCurrentMatchResult);
+  const currMatchDetails = useQuery(api.seasons.getCurrentMatchDetails);
   const addMatch = useMutation(api.seasons.addMatchDetails);
   const playerWithBooking = useQuery(api.players.getCurrentMatchBookings);
 
-  // console.log(JSON.stringify(playerWithBooking, null, 2));
+  useEffect(() => {
+    if (currMatchDetails) {
+      setCurrentMatch(currMatchDetails);
+      setLoadingMatch(false);
+    }
+  }, [currMatchDetails]);
 
   const teams: TeamType[] =
     useQuery(api.teams.getTeams)?.map((team) => ({
@@ -67,13 +134,55 @@ const CurrentResultScreen = () => {
     setShowScorelineForm(false);
   };
 
-  // const handleDelete = (bid: Id<"bookings">) => {
-  //   console.log("Deleted: " + bid);
-  // };
+  function groupGoalsForDisplay(goals: Goal[]): GroupedGoalOutput[] {
+    // { scorer -> { assister -> { count, gtype } } }
+    const map = new Map<string, Map<string | null, { count: number; gtype?: string }>>();
 
-  const isLoading = currMatch === undefined;
+    for (const g of goals) {
+      const scorer = g.scorer!;
+      const assister = g.assister ?? null;
 
-  if (isLoading) return <LoadingSpinner title="other" />;
+      if (!map.has(scorer)) {
+        map.set(scorer, new Map());
+      }
+
+      const assisterMap = map.get(scorer)!;
+
+      if (!assisterMap.has(assister)) {
+        assisterMap.set(assister, { count: 0, gtype: g.gtype! });
+      }
+
+      const entry = assisterMap.get(assister)!;
+      entry.count += 1;
+
+      // if any goal in this group is a penalty or own goal, keep that info
+      if (g.gtype) {
+        entry.gtype = g.gtype;
+      }
+    }
+
+    const output: GroupedGoalOutput[] = [];
+
+    for (const [scorer, assisterMap] of map.entries()) {
+      for (const [assister, data] of assisterMap.entries()) {
+        output.push({
+          scorer,
+          assister,
+          count: data.count,
+          gtype: data.gtype,
+        });
+      }
+    }
+
+    return output;
+  }
+
+  if (currentMatch === undefined || loadingMatch) {
+    return <LoadingSpinner title="other" />;
+  }
+
+  const dedupedHome = groupGoalsForDisplay(currentMatch.homeTeam.gc);
+  const dedupedAway = groupGoalsForDisplay(currentMatch.awayTeam.gc);
 
   if (!playerWithBooking) return null;
 
@@ -145,6 +254,8 @@ const CurrentResultScreen = () => {
                 <MatchForm
                   teams={teams}
                   onSubmit={addMatch}
+                  onSaved={setCurrentMatch}
+                  onLoading={setLoadingMatch}
                   setIsVisible={setIsVisible}
                   setShowScorelineForm={setShowScorelineForm}
                 />
@@ -170,30 +281,151 @@ const CurrentResultScreen = () => {
             )}
           </>
         : <>
-            {!currMatch && <NoMatch />}
+            {!currentMatch && <NoMatch />}
 
-            {currMatch && (
+            {currentMatch && (
               <>
                 {/* SCORELINE */}
                 <View className="px-7 py-5 bg-white my-3 rounded-lg flex flex-col gap-7">
                   <Subtitles subtitle="Scoreline" />
                   <View className="flex flex-row gap-5 items-center justify-between">
-                    <ScoreBoardCard score={currMatch?.homeScore?.toString()} sender="blue" />
-                    <View className="w-10 h-1 bg-slate-600 flex items-center justify-center rounded-lg"></View>
-                    <ScoreBoardCard score={currMatch?.awayScore?.toString()} sender="red" />
+                    <ScoreBoardCard
+                      score={currentMatch?.homeTeam.score?.toString()}
+                      sender="blue"
+                    />
+
+                    <View className="flex-col items-center justify-center">
+                      <View className="w-10 h-1 bg-slate-300 mt-10 flex items-center justify-center "></View>
+                      <Text className="mt-3 text-lg text-slate-600 font-light">
+                        {currentMatch.date}
+                      </Text>
+                    </View>
+
+                    <ScoreBoardCard score={currentMatch?.awayTeam.score?.toString()} sender="red" />
                   </View>
                 </View>
 
                 {/* SCORERES AND ASSIST PROVIDERS */}
                 <View className="px-7 py-5 bg-white my-3 rounded-lg flex flex-col gap-7">
                   <Subtitles subtitle="Scorers and Assist Providers" />
-                  <View className="flex flex-row gap-5 items-center justify-between">
-                    <View className="">
-                      <Text className="italic font-semibold text-slate-600">Scorers</Text>
+                  <View className="flex flex-row">
+                    <View className="w-[50%] flex-col gap-3">
+                      <View>
+                        <Text
+                          className={`${/\bred\b/i.test(currentMatch.homeTeam?.tname.toString() ?? "") && "text-red-500"} ${/\bblue\b/i.test(currentMatch.homeTeam?.tname ?? "") && "text-blue-500"} uppercase text-[12px] font-bold`}>
+                          {currentMatch.homeTeam?.tname.toString()}
+                        </Text>
+                      </View>
+                      <View className="flex flex-col">
+                        {dedupedHome.map((g, i) => (
+                          <View key={i} className="flex-row items-center gap-3 py-2">
+                            {/* <View>
+                              <Ionicons
+                                name="football"
+                                size={17}
+                                color={
+                                  g.gtype && g.gtype === "own_goal" ?
+                                    colors.red[400]
+                                  : colors.slate[500]
+                                }
+                              />
+                            </View> */}
+                            <View>
+                              {g.gtype === "penalty" && (
+                                <Ionicons name="football" size={17} color={colors.slate[500]} />
+                              )}
+                              {g.gtype === "own_goal" && (
+                                <Ionicons name="football" size={17} color={colors.red[500]} />
+                              )}
+                              {g.gtype === "normal" && (
+                                <Ionicons name="football" size={17} color={colors.slate[500]} />
+                              )}
+                            </View>
+
+                            <View className="flex-col gap-1">
+                              <Text className="text-[15px] text-slate-600 font-semibold">
+                                {g.scorer}{" "}
+                                {g.count > 1 && (
+                                  <Text className="opacity-70">({`x${g.count}`})</Text>
+                                )}
+                              </Text>
+                              {g.assister && (
+                                <Text className="text-slate-500">Assisted by {g.assister}</Text>
+                              )}
+                              {g.gtype && g.gtype === "own_goal" && (
+                                <Text className="text-slate-500 text-sm">Own goal</Text>
+                              )}
+                              {g.gtype && g.gtype === "penalty" && (
+                                <Text className="text-slate-500 text-sm">Penalty</Text>
+                              )}
+                            </View>
+                          </View>
+                        ))}
+                      </View>
                     </View>
-                    <View>
-                      <Text className="italic font-semibold text-slate-600">Assist Providers</Text>
+
+                    <View className="w-[50%] flex-col gap-3">
+                      <View>
+                        <Text
+                          className={`${/\bred\b/i.test(currentMatch.awayTeam?.tname ?? "") && "text-red-500"} ${/\bblue\b/i.test(currentMatch.awayTeam?.tname ?? "") && "text-blue-500"} uppercase text-[12px] font-bold`}>
+                          {currentMatch.awayTeam.tname.toString()}
+                        </Text>
+                      </View>
+                      <View className="flex flex-col">
+                        {dedupedAway.map((g, i) => (
+                          <View key={i} className="flex-row items-center gap-3 py-2">
+                            {/* <View>
+                              <Ionicons
+                                name="football"
+                                size={17}
+                                color={
+                                  g.gtype && g.gtype === "own_goal" ?
+                                    colors.red[400]
+                                  : colors.slate[500]
+                                }
+                              />
+                            </View> */}
+                            <View>
+                              {g.gtype === "penalty" && <Ionicons name="football" size={17} />}
+                              {g.gtype === "own_goal" && (
+                                <Ionicons name="football" size={17} color={colors.red[500]} />
+                              )}
+                              {g.gtype === "normal" && (
+                                <Ionicons name="football" size={17} color={colors.slate[500]} />
+                              )}
+                            </View>
+
+                            <View className="flex-col gap-1">
+                              <Text className="text-[15px] text-slate-600 font-semibold">
+                                {g.scorer}{" "}
+                                {g.count > 1 && (
+                                  <Text className="opacity-70">({`x${g.count}`})</Text>
+                                )}
+                              </Text>
+                              {g.assister && (
+                                <Text className="text-slate-500 text-sm">
+                                  Assisted by {g.assister}
+                                </Text>
+                              )}
+                              {g.gtype && g.gtype === "own_goal" && (
+                                <Text className="text-slate-500 text-sm">Own goal</Text>
+                              )}
+                              {g.gtype && g.gtype === "penalty" && (
+                                <Text className="text-slate-500 text-sm">Penalty</Text>
+                              )}
+                            </View>
+                          </View>
+                        ))}
+                      </View>
                     </View>
+                    {/* {teams.map((t) => (
+                      <View key={t.value} className="w-[50%]">
+                        <Text
+                          className={`${t.label.toLocaleLowerCase().includes("red") && "text-red-500"} ${t.label.toLocaleLowerCase().includes("blue") && "text-blue-500"} uppercase text-[12px] font-bold`}>
+                          {t.label.toString()}
+                        </Text>
+                      </View>
+                    ))} */}
                   </View>
                 </View>
 

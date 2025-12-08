@@ -57,6 +57,7 @@ export default defineSchema({
     matchId: v.id("matches"),
     teamId: v.id("teams"),
     scorerId: v.id("players"),
+    goalType: v.union(v.literal("normal"), v.literal("own_goal"), v.literal("penalty")),
     assisterId: v.optional(v.id("players")),
     seasonId: v.id("seasons"),
   })
