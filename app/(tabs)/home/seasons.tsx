@@ -5,7 +5,7 @@ import { Text } from "react-native";
 const SeasonsScreen = () => {
   return (
     <BackgroundCard title={"seasons"} gap={false}>
-      <Text>Seasons</Text>
+      <Text></Text>
     </BackgroundCard>
   );
 };

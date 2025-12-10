@@ -1,4 +1,6 @@
+import FilterSection from "@/components/FilterSection";
 import { api } from "@/convex/_generated/api";
+import { useActiveNestedTab } from "@/hooks/useActiveTopTab";
 import { Ionicons } from "@react-native-vector-icons/ionicons";
 import { useMutation } from "convex/react";
 import { Tabs } from "expo-router";
@@ -7,15 +9,28 @@ import { Text, View } from "react-native";
 
 const BottomTabsLayout = () => {
   const ensureYear = useMutation(api.teams.ensureYearExists);
+  const activeTab = useActiveNestedTab("(tabs)", "home");
 
   useEffect(() => {
     ensureYear();
   }, []);
 
+  const isPlayerStats = activeTab === "playerStats";
+
   return (
     <>
-      <View className="pt-[60px] pb-[30px] bg-white px-7">
-        <Text className="text-2xl font-bold justify-center text-slate-700">R v B FC</Text>
+      <View className="bg-slate-900 pt-[70px] px-7 flex-col">
+        <View className="w-1/2 mb-5">
+          <Text className="text-4xl font-bold justify-center text-slate-300">R v B FC</Text>
+        </View>
+        {isPlayerStats && (
+          <View className="flex-row">
+            <View className="w-1/3"></View>
+            <View className="w-2/3">
+              <FilterSection />
+            </View>
+          </View>
+        )}
       </View>
       <Tabs
         screenOptions={{
