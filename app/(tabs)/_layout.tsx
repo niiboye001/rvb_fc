@@ -1,24 +1,31 @@
 import FilterSection from "@/components/FilterSection";
 import { api } from "@/convex/_generated/api";
 import { useActiveNestedTab } from "@/hooks/useActiveTopTab";
+import { useFilters } from "@/hooks/useFilter";
 import { Ionicons } from "@react-native-vector-icons/ionicons";
 import { useMutation } from "convex/react";
 import { Tabs } from "expo-router";
 import React, { useEffect } from "react";
-import { Text, View } from "react-native";
+import { StatusBar, Text, View } from "react-native";
 
 const BottomTabsLayout = () => {
+  const { setFilters } = useFilters();
   const ensureYear = useMutation(api.teams.ensureYearExists);
   const activeTab = useActiveNestedTab("(tabs)", "home");
+
+  const isPlayerStats = activeTab === "playerStats";
 
   useEffect(() => {
     ensureYear();
   }, []);
 
-  const isPlayerStats = activeTab === "playerStats";
+  useEffect(() => {
+    if (!isPlayerStats) setFilters({});
+  }, [isPlayerStats]);
 
   return (
     <>
+      <StatusBar barStyle="light-content" />
       <View className="bg-slate-900 pt-[70px] px-7 flex-col">
         <View className="w-1/2 mb-5">
           <Text className="text-4xl font-bold justify-center text-slate-300">R v B FC</Text>

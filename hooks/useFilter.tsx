@@ -12,6 +12,8 @@ interface FilterValues {
 interface FilterContextType {
   filters: FilterValues;
   setFilters: React.Dispatch<React.SetStateAction<FilterValues>>;
+  // isHidden: boolean;
+  // setIsHidden: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const FilterContext = createContext<FilterContextType | undefined>(undefined);
@@ -19,6 +21,7 @@ const FilterContext = createContext<FilterContextType | undefined>(undefined);
 // Provider component
 export const FilterProvider = ({ children }: { children: ReactNode }) => {
   const [filters, setFilters] = useState<FilterValues>({});
+  // const [isHidden, setIsHidden] = useState(true);
 
   return (
     <FilterContext.Provider value={{ filters, setFilters }}>{children}</FilterContext.Provider>

@@ -67,27 +67,27 @@ const PlayerStatsScreen = () => {
     return curr.numOfAssist > prev.numOfAssist ? curr : prev;
   }, null);
 
-  // console.log(topStats.topScorers);
+  // console.log(filters);
 
   const renderTopScorerItem: ListRenderItem<PlayerGoal | null> = ({ item }) => {
     if (!item) return null; // handle potential null values safely
 
     return (
       <View className="flex-row items-center my-2">
-        <View className="w-3/6">
-          <Text className="text-[15px] text-slate-600">{item.playerName}</Text>
+        <View className="w-2/5">
+          <Text className="text-[16px] text-slate-600">{item.playerName}</Text>
         </View>
-        <View className="w-2/6">
+        <View className="w-2/5">
           <Text
-            className={`${item.team?.trim().toLocaleLowerCase() === "red team" && "text-red-500"} ${item.team?.trim().toLocaleLowerCase() === "blue team" && "text-blue-500"} text-[15px]`}>
+            className={`${item.team?.trim().toLocaleLowerCase() === "red team" && "text-red-500"} ${item.team?.trim().toLocaleLowerCase() === "blue team" && "text-blue-500"} text-[16px]`}>
             {item.team}
           </Text>
         </View>
-        <View className="w-1/6 flex items-end">
+        <View className="w-1/5 flex items-end">
           <View
             className={`flex items-center justify-center rounded-full h-7 w-7 ${item.playerName === highestScorer?.playerName ? "bg-slate-700" : ""}`}>
             <Text
-              className={`text-[15px] ${item.playerName === highestScorer?.playerName ? "text-slate-100" : "text-slate-500"}  font-bold`}>
+              className={`text-[16px] ${item.playerName === highestScorer?.playerName ? "text-slate-100" : "text-slate-500"}  font-bold`}>
               {item.numOfGoals}
             </Text>
           </View>
@@ -101,20 +101,20 @@ const PlayerStatsScreen = () => {
 
     return (
       <View className="flex-row items-center my-2">
-        <View className="w-3/6">
-          <Text className="text-[15px] text-slate-600">{item.playerName}</Text>
+        <View className="w-2/5">
+          <Text className="text-[16px] text-slate-600">{item.playerName}</Text>
         </View>
-        <View className="w-2/6">
+        <View className="w-2/5">
           <Text
-            className={`${item.team?.trim().toLocaleLowerCase() === "red team" && "text-red-500"} ${item.team?.trim().toLocaleLowerCase() === "blue team" && "text-blue-500"} text-[15px]`}>
+            className={`${item.team?.trim().toLocaleLowerCase() === "red team" && "text-red-500"} ${item.team?.trim().toLocaleLowerCase() === "blue team" && "text-blue-500"} text-[16px]`}>
             {item.team}
           </Text>
         </View>
-        <View className="w-1/6 flex items-end">
+        <View className="w-1/5 flex items-end">
           <View
             className={`flex items-center justify-center rounded-full h-7 w-7 ${item.playerName === highestAssistProvider?.playerName ? "bg-slate-700" : ""}`}>
             <Text
-              className={`text-[15px] ${item.playerName === highestAssistProvider?.playerName ? "text-slate-100" : "text-slate-500"}  font-bold`}>
+              className={`text-[16px] ${item.playerName === highestAssistProvider?.playerName ? "text-slate-100" : "text-slate-500"}  font-bold`}>
               {item.numOfAssist}
             </Text>
           </View>

@@ -12,7 +12,7 @@ const FilterSection = () => {
   const { years } = useYear();
   const { filters, setFilters } = useFilters();
   const [selectedYear, setSelectedYear] = useState<Id<"years">>(years[0].yearId as Id<"years">);
-  const [selectedSeason, setSelectedSeason] = useState<Id<"seasons"> | undefined>(undefined);
+  //   const [selectedSeason, setSelectedSeason] = useState<Id<"seasons"> | undefined>(filters.seasonId);
   const [seasonOptions, setSeasonOptions] = useState<{ label: string; value: Id<"seasons"> }[]>([]);
 
   const yearsOptions = years.map((y) => ({ label: y.year, value: y.yearId }));
@@ -27,7 +27,8 @@ const FilterSection = () => {
         .map((s) => ({ label: s.season, value: s._id }));
 
       setSeasonOptions(options);
-      setSelectedSeason(seasons[0]?._id as Id<"seasons">); // safer access
+      //   setSelectedSeason(seasons[0]?._id as Id<"seasons">);
+      setFilters((prev) => ({ ...prev, seasonId: seasons[0]?._id as Id<"seasons"> }));
     }
   }, [seasons, years]);
 
@@ -66,7 +67,7 @@ const FilterSection = () => {
             <>
               {/* <Text className="text-sm uppercase text-slate-400 font-semibold pb-1">by season</Text> */}
               <View>
-                {!selectedSeason ?
+                {!filters.seasonId ?
                   <ActivityIndicator size="small" color={colors.slate[400]} />
                 : <Dropdown
                     // placeholder="Select Season"

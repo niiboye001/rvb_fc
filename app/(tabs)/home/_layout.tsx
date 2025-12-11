@@ -15,9 +15,12 @@ const TopTabsLayout = () => {
           tabBarActiveTintColor: `${colors.slate[300]}`,
           tabBarInactiveTintColor: `${colors.slate[600]}`,
           tabBarIndicatorStyle: { backgroundColor: colors.slate[100] },
+          tabBarItemStyle: { width: "auto" },
           tabBarLabelStyle: { fontWeight: "bold", fontSize: 17 },
           tabBarStyle: { backgroundColor: colors.slate[900] },
           tabBarBounces: true,
+          swipeEnabled: true,
+          animationEnabled: true,
         }}>
         <HomeTabs.Screen name="index" options={{ title: "Current Result" }} />
         <HomeTabs.Screen name="leagueTable" options={{ title: "League Table" }} />
