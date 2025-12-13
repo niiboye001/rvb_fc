@@ -1,17 +1,44 @@
 import Ionicons from "@react-native-vector-icons/ionicons";
+import { Link } from "expo-router";
 import React from "react";
-import { TouchableOpacity, View } from "react-native";
+import { View } from "react-native";
 import * as colors from "tailwindcss/colors";
 import Subtitles from "./Subtitles";
 
-const TopStatsCard = ({ headerName = "" }) => {
+type PlayerAssist = {
+  playerName: string;
+  numOfAssist: number;
+  team: string | null;
+};
+
+type TopStats = {
+  topScorers: (PlayerGoal | null)[];
+  assistProviders: (PlayerAssist | null)[];
+};
+
+type PlayerGoal = {
+  playerName: string;
+  numOfGoals: number;
+  team: string | null;
+};
+
+const TopStatsCard = ({ headerName = "", data }: { headerName: string; data: TopStats }) => {
   return (
-    <TouchableOpacity activeOpacity={0.6}>
-      <View className="flex-row items-center justify-between">
+    <Link
+      href={{
+        pathname: headerName.includes("scorer") ? "/topscorers-screen" : "/assisters-screen",
+        params: {
+          sender: JSON.stringify(
+            headerName.includes("scorer") ? data.topScorers : data.assistProviders
+          ),
+        },
+      }}
+      className="py-2">
+      <View className="flex-row items-center justify-between w-full">
         <Subtitles subtitle={headerName} />
         <Ionicons name="chevron-forward-sharp" size={14} color={colors.slate[400]} />
       </View>
-    </TouchableOpacity>
+    </Link>
   );
 };
 

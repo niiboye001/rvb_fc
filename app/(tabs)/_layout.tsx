@@ -6,7 +6,7 @@ import { Ionicons } from "@react-native-vector-icons/ionicons";
 import { useMutation } from "convex/react";
 import { Tabs } from "expo-router";
 import React, { useEffect } from "react";
-import { StatusBar, Text, View } from "react-native";
+import { StatusBar, View } from "react-native";
 
 const BottomTabsLayout = () => {
   const { setFilters } = useFilters();
@@ -26,10 +26,7 @@ const BottomTabsLayout = () => {
   return (
     <>
       <StatusBar barStyle="light-content" />
-      <View className="bg-slate-900 pt-[70px] px-7 flex-col">
-        <View className="w-1/2 mb-5">
-          <Text className="text-4xl font-bold justify-center text-slate-300">R v B FC</Text>
-        </View>
+      <View className="bg-slate-900 pt-4 px-7 flex-col">
         {isPlayerStats && (
           <View className="flex-row">
             <View className="w-1/3"></View>
@@ -39,6 +36,7 @@ const BottomTabsLayout = () => {
           </View>
         )}
       </View>
+
       <Tabs
         screenOptions={{
           headerShown: false,

@@ -128,7 +128,7 @@ const PlayerStatsScreen = () => {
       <Text className="font-extrabold text-[18px] text-slate-700 py-6 uppercase">Top stats</Text>
       <View className="flex-col gap-5">
         <View className="bg-white p-7 rounded-lg flex-col gap-5">
-          <TopStatsCard headerName="top scorer" />
+          <TopStatsCard headerName="top scorer" data={topStats} />
           <View className="flex-col gap-5">
             <FlatList
               data={topStats.topScorers.filter(Boolean)}
@@ -139,7 +139,7 @@ const PlayerStatsScreen = () => {
         </View>
 
         <View className="bg-white p-7 rounded-lg flex-col gap-5">
-          <TopStatsCard headerName="top assist provider" />
+          <TopStatsCard headerName="top assist provider" data={topStats} />
           <View className="flex-col gap-5">
             <FlatList
               data={topStats.assistProviders.filter(Boolean)}
