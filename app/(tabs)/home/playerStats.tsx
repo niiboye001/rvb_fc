@@ -125,7 +125,7 @@ const PlayerStatsScreen = () => {
 
   return (
     <View className="px-5 flex-col">
-      <Text className="font-extrabold text-[18px] text-slate-700 py-6 uppercase">Top stats</Text>
+      <Text className="font-extrabold text-[16px] text-slate-700 py-4 uppercase">Top stats</Text>
       <View className="flex-col gap-5">
         <View className="bg-white p-7 rounded-lg flex-col gap-5">
           <TopStatsCard headerName="top scorer" data={topStats} />
