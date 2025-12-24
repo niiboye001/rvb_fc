@@ -1,4 +1,5 @@
 import { v } from "convex/values";
+import { api } from "./_generated/api";
 import { Id } from "./_generated/dataModel";
 import { mutation, query } from "./_generated/server";
 
@@ -502,6 +503,16 @@ export const getAllYears = query({
   },
 });
 
+export const getYearByName = query({
+  args: { year: v.string() },
+  handler: async (ctx, { year }) => {
+    return ctx.db
+      .query("years")
+      .filter((f) => f.eq(f.field("year"), year))
+      .first();
+  },
+});
+
 export const getSeasonsByYear = query({
   args: { yearId: v.id("years") },
   handler: async (ctx, { yearId }) => {
@@ -512,6 +523,8 @@ export const getSeasonsByYear = query({
       .collect();
   },
 });
+
+// convex/standings.ts
 
 export const getTopStatsBySeason = query({
   args: { seasonId: v.id("seasons") },
@@ -607,6 +620,192 @@ export const getTopStatsBySeason = query({
       topScorers,
       assistProviders,
     };
+  },
+});
+
+// Internal query: compute flattened standings for one season
+export const getStandings = query({
+  args: { seasonId: v.id("seasons") },
+  handler: async (ctx, { seasonId }) => {
+    const matches = await ctx.db
+      .query("matches")
+      .filter((q) => q.eq(q.field("season"), seasonId))
+      .collect();
+
+    const table = new Map<string, any>();
+
+    const ensure = (teamId: string) => {
+      if (!table.has(teamId)) {
+        table.set(teamId, {
+          teamId,
+          played: 0,
+          wins: 0,
+          draws: 0,
+          losses: 0,
+          goalsFor: 0,
+          goalsAgainst: 0,
+          points: 0,
+        });
+      }
+      return table.get(teamId)!;
+    };
+
+    for (const match of matches) {
+      if (match.homeScore === undefined || match.awayScore === undefined) continue;
+
+      const home = ensure(match.homeTeamId);
+      const away = ensure(match.awayTeamId);
+
+      home.played++;
+      away.played++;
+
+      home.goalsFor += match.homeScore;
+      home.goalsAgainst += match.awayScore;
+
+      away.goalsFor += match.awayScore;
+      away.goalsAgainst += match.homeScore;
+
+      if (match.homeScore > match.awayScore) {
+        home.wins++;
+        home.points += 3;
+        away.losses++;
+      } else if (match.homeScore < match.awayScore) {
+        away.wins++;
+        away.points += 3;
+        home.losses++;
+      } else {
+        home.draws++;
+        away.draws++;
+        home.points++;
+        away.points++;
+      }
+    }
+
+    const rows = Array.from(table.values()).sort((a, b) => {
+      if (b.points !== a.points) return b.points - a.points;
+      const gdA = a.goalsFor - a.goalsAgainst;
+      const gdB = b.goalsFor - b.goalsAgainst;
+      if (gdB !== gdA) return gdB - gdA;
+      return b.goalsFor - a.goalsFor;
+    });
+
+    // Flatten with team name
+    return Promise.all(
+      rows.map(async (row, index) => {
+        // cast to only the team type
+        const team = (await ctx.db.get(row.teamId)) as { name: string } | null;
+
+        return {
+          position: index + 1,
+          team: team?.name ?? "Unknown",
+          played: row.played,
+          wins: row.wins,
+          draws: row.draws,
+          losses: row.losses,
+          goalsFor: row.goalsFor,
+          goalsAgainst: row.goalsAgainst,
+          goalDifference: row.goalsFor - row.goalsAgainst,
+          points: row.points,
+        };
+      })
+    );
+  },
+});
+
+// Internal query: get top scorer and top assister with team
+export const getSeasonTopStats = query({
+  args: { seasonId: v.id("seasons") },
+  handler: async (ctx, { seasonId }) => {
+    const events = await ctx.db
+      .query("goalEvents")
+      .withIndex("by_season", (q) => q.eq("seasonId", seasonId))
+      .collect();
+
+    const scorers = new Map<string, number>();
+    const assisters = new Map<string, number>();
+
+    for (const e of events) {
+      scorers.set(e.scorerId, (scorers.get(e.scorerId) ?? 0) + 1);
+      if (e.assisterId) assisters.set(e.assisterId, (assisters.get(e.assisterId) ?? 0) + 1);
+    }
+
+    const season = await ctx.db.get(seasonId);
+    if (!season) return { topScorer: null, topAssister: null };
+
+    const topScorerEntry = [...scorers.entries()].sort((a, b) => b[1] - a[1])[0];
+    const topAssisterEntry = [...assisters.entries()].sort((a, b) => b[1] - a[1])[0];
+
+    const getPlayerTeam = async (playerId: Id<"players">) => {
+      const playerTeam = await ctx.db
+        .query("playersTeams")
+        .withIndex("by_playerId", (q) => q.eq("playerId", playerId))
+        .filter((q) => q.eq(q.field("yearId"), season.yearId))
+        .first();
+
+      if (!playerTeam) return null;
+
+      const team = await ctx.db.get(playerTeam.teamId);
+
+      return team;
+    };
+
+    let topScorer = null;
+    let topAssister = null;
+
+    if (topScorerEntry) {
+      const playerId = topScorerEntry[0] as Id<"players">;
+      const player = await ctx.db.get(playerId);
+
+      if (player) {
+        const team = await getPlayerTeam(player._id);
+        topScorer = player && team ? { player: player.name, team: team.name } : null;
+      }
+    }
+
+    if (topAssisterEntry) {
+      const playerId = topAssisterEntry[0] as Id<"players">;
+      const player = await ctx.db.get(playerId);
+
+      if (player) {
+        const team = await getPlayerTeam(player?._id);
+        topAssister = player && team ? { player: player.name, team: team.name } : null;
+      }
+    }
+
+    return { topScorer, topAssister };
+  },
+});
+
+// Public query: final overview for a year
+export const getYearOverview = query({
+  args: { yearId: v.id("years") },
+  handler: async (ctx, { yearId }) => {
+    const seasons = await ctx.db
+      .query("seasons")
+      .withIndex("by_yearId", (q) => q.eq("yearId", yearId))
+      .collect();
+
+    const result: Record<string, any> = {};
+
+    for (const season of seasons) {
+      const standings = await ctx.runQuery(api.seasons.getStandings, {
+        seasonId: season._id,
+      });
+
+      const topStats = await ctx.runQuery(api.seasons.getSeasonTopStats, {
+        seasonId: season._id,
+      });
+
+      // console.log(topStats);
+
+      result[season.season] = {
+        standings,
+        topScorer: topStats.topScorer,
+        topAssister: topStats.topAssister,
+      };
+    }
+
+    return result;
   },
 });
 

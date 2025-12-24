@@ -3,8 +3,21 @@ import React, { useState } from "react";
 import { Text, TouchableOpacity, View } from "react-native";
 import * as colors from "tailwindcss/colors";
 
-const SeasonCard = ({ cardTitle = "" }) => {
+interface DataType {
+  season: string;
+  standings: any[];
+  topScorer: { player: string; team: string };
+  topAssister: { player: string; team: string };
+}
+interface SeasonOverviewType {
+  seasonOverview: DataType[];
+  cardTitle: string;
+}
+
+const SeasonCard = ({ cardTitle = "", seasonOverview }: SeasonOverviewType) => {
   const [isCollapsed, setIsCollapsed] = useState(true);
+
+  // console.log(seasonOverview);
 
   return (
     <>
@@ -19,7 +32,7 @@ const SeasonCard = ({ cardTitle = "" }) => {
       </TouchableOpacity>
       {!isCollapsed && (
         <View className="bg-white p-5">
-          <Text>lasjdf</Text>
+          <Text>{seasonOverview[0].topAssister.team}</Text>
         </View>
       )}
     </>
