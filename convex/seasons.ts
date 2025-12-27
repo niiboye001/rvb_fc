@@ -721,19 +721,52 @@ export const getSeasonTopStats = query({
       .withIndex("by_season", (q) => q.eq("seasonId", seasonId))
       .collect();
 
-    const scorers = new Map<string, number>();
-    const assisters = new Map<string, number>();
+    const scorers = new Map<Id<"players">, number>();
+    const assisters = new Map<Id<"players">, number>();
 
     for (const e of events) {
       scorers.set(e.scorerId, (scorers.get(e.scorerId) ?? 0) + 1);
+
       if (e.assisterId) assisters.set(e.assisterId, (assisters.get(e.assisterId) ?? 0) + 1);
     }
 
     const season = await ctx.db.get(seasonId);
+
     if (!season) return { topScorer: null, topAssister: null };
 
-    const topScorerEntry = [...scorers.entries()].sort((a, b) => b[1] - a[1])[0];
-    const topAssisterEntry = [...assisters.entries()].sort((a, b) => b[1] - a[1])[0];
+    const buildWinners = async <T extends "goals" | "assists">(
+      entries: [Id<"players">, number][],
+      statKey: T
+    ) => {
+      const results = [];
+
+      for (const [playerId, count] of entries) {
+        const player = await ctx.db.get(playerId);
+        if (!player) continue;
+
+        const team = await getPlayerTeam(player._id);
+        if (!team) continue;
+
+        results.push({
+          player: player.name,
+          team: team.name,
+          [statKey]: count,
+        });
+      }
+
+      // 👉 single object if no tie, array if tie
+      return results.length === 1 ? results[0] : results;
+    };
+
+    // const topScorerEntry = [...scorers.entries()].sort((a, b) => b[1] - a[1])[0];
+    // const topAssisterEntry = [...assisters.entries()].sort((a, b) => b[1] - a[1])[0];
+    const maxGoals = Math.max(0, ...scorers.values());
+    const maxAssists = Math.max(0, ...assisters.values());
+
+    const topScorerEntries = [...scorers.entries()].filter(([, goals]) => goals === maxGoals);
+    const topAssisterEntries = [...assisters.entries()].filter(
+      ([, assists]) => assists === maxAssists
+    );
 
     const getPlayerTeam = async (playerId: Id<"players">) => {
       const playerTeam = await ctx.db
@@ -749,28 +782,13 @@ export const getSeasonTopStats = query({
       return team;
     };
 
-    let topScorer = null;
-    let topAssister = null;
+    // let topScorer = null;
+    // let topAssister = null;
+    const topScorer =
+      topScorerEntries.length > 0 ? await buildWinners(topScorerEntries, "goals") : null;
 
-    if (topScorerEntry) {
-      const playerId = topScorerEntry[0] as Id<"players">;
-      const player = await ctx.db.get(playerId);
-
-      if (player) {
-        const team = await getPlayerTeam(player._id);
-        topScorer = player && team ? { player: player.name, team: team.name } : null;
-      }
-    }
-
-    if (topAssisterEntry) {
-      const playerId = topAssisterEntry[0] as Id<"players">;
-      const player = await ctx.db.get(playerId);
-
-      if (player) {
-        const team = await getPlayerTeam(player?._id);
-        topAssister = player && team ? { player: player.name, team: team.name } : null;
-      }
-    }
+    const topAssister =
+      topAssisterEntries.length > 0 ? await buildWinners(topAssisterEntries, "assists") : null;
 
     return { topScorer, topAssister };
   },

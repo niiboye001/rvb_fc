@@ -15,7 +15,7 @@ const FilterSection = () => {
   //   const [selectedSeason, setSelectedSeason] = useState<Id<"seasons"> | undefined>(filters.seasonId);
   const [seasonOptions, setSeasonOptions] = useState<{ label: string; value: Id<"seasons"> }[]>([]);
 
-  const yearsOptions = years.map((y) => ({ label: y.year, value: y.yearId }));
+  const yearsOptions = years.map((y) => ({ label: y?.year, value: y?.yearId }));
 
   const seasons =
     useQuery(api.seasons.getSeasonsByYear, selectedYear ? { yearId: selectedYear } : "skip") ?? [];

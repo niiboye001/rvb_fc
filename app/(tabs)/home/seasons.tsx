@@ -1,18 +1,10 @@
 import SeasonCard from "@/components/SeasonCard";
 import { api } from "@/convex/_generated/api";
 import { useQuery } from "convex/react";
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { Text, View } from "react-native";
 
-// type SeasonOverview = {
-//   standings: any[];
-//   topScorer: { player: string; team: string };
-//   topAssister: { player: string; team: string };
-// };
-
 const SeasonsScreen = () => {
-  const [yearOverview, setYearOverview] = useState<Record<string, any>>();
-
   const yearId = useQuery(api.seasons.getYearByName, { year: "2025" });
 
   const rawOverview = useQuery(
@@ -20,20 +12,16 @@ const SeasonsScreen = () => {
     yearId ? { yearId: yearId._id } : "skip"
   ) ?? { standings: [], topScorer: null, topAssister: null };
 
-  useEffect(() => {
-    setYearOverview(rawOverview);
-  }, [rawOverview]);
+  if (!rawOverview) return;
 
-  if (!yearOverview) return;
-
-  const seasonsArray = Object.entries(yearOverview).map(([season, data]) => ({
+  const seasonsArray = Object.entries(rawOverview).map(([season, data]) => ({
     season,
     standings: data?.standings,
     topScorer: data?.topScorer,
     topAssister: data?.topAssister,
   }));
 
-  console.log(seasonsArray[0]);
+  // console.log(seasonsArray[0]);
 
   return (
     <View className="px-5 flex-col">
