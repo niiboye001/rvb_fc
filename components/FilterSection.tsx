@@ -40,9 +40,9 @@ const FilterSection = () => {
   };
 
   return (
-    <View className="bg-slate-900">
-      <View className="flex-row">
-        <View className="w-1/2">
+    <View>
+      <View className="flex-row gap-3">
+        <View className="w-1/2 bg-slate-900 px-2 rounded-lg">
           {/* <Text className="text-sm uppercase text-slate-400 font-semibold pb-1">by year</Text> */}
           <Dropdown
             data={yearsOptions}
@@ -62,7 +62,7 @@ const FilterSection = () => {
           />
         </View>
 
-        <View className="w-1/2">
+        <View className="w-1/2 bg-slate-900 px-2 rounded-lg">
           {selectedYear && (
             <>
               {/* <Text className="text-sm uppercase text-slate-400 font-semibold pb-1">by season</Text> */}

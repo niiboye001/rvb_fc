@@ -21,7 +21,7 @@ export default function RootLayout() {
           <AppContextProvider>
             <YearContextProvider>
               <SafeAreaProvider>
-                <View className="bg-slate-900 px-7 pt-20 pb-3">
+                <View className="bg-slate-800 px-7 pt-20 pb-3 flex items-center justify-center">
                   <Text className="text-4xl font-bold text-slate-300">R v B FC</Text>
                 </View>
                 <Stack
@@ -61,7 +61,7 @@ export default function RootLayout() {
                     name="assisters-screen"
                     options={{
                       title: "Top Assist Providers",
-                      headerStyle: { backgroundColor: colors.slate[900] },
+                      headerStyle: { backgroundColor: colors.slate[800] },
                       headerTintColor: colors.slate[200],
                       headerTitleStyle: { fontSize: 15 },
                     }}
@@ -70,7 +70,7 @@ export default function RootLayout() {
                     name="topscorers-screen"
                     options={{
                       title: "Top Scorers",
-                      headerStyle: { backgroundColor: colors.slate[900] },
+                      headerStyle: { backgroundColor: colors.slate[800] },
                       headerTintColor: colors.slate[100],
                       headerTitleStyle: { fontSize: 15 },
                     }}

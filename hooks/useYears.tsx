@@ -1,6 +1,6 @@
 import { api } from "@/convex/_generated/api";
 import { useQuery } from "convex/react";
-import { createContext, ReactNode, useContext, useState } from "react";
+import { createContext, ReactNode, useContext } from "react";
 
 interface YearType {
   year: string;
@@ -18,8 +18,8 @@ interface YearProviderProps {
 const YearContext = createContext<YearContextType>({ years: [] });
 
 export const YearContextProvider = ({ children }: YearProviderProps) => {
-  const [yid, setYid] = useState();
-  const [sid, setSid] = useState();
+  // const [yid, setYid] = useState();
+  // const [sid, setSid] = useState();
 
   const allYears = useQuery(api.seasons.getAllYears); // use the correct query
 

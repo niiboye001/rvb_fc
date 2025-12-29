@@ -26,15 +26,20 @@ const TopStatsCard = ({ headerName = "", data }: { headerName: string; data: Top
   return (
     <Link
       href={{
-        pathname: headerName.includes("scorer") ? "/topscorers-screen" : "/assisters-screen",
+        pathname:
+          headerName.trim().toLocaleLowerCase().includes("scorers") ?
+            "/topscorers-screen"
+          : "/assisters-screen",
         params: {
           sender: JSON.stringify(
-            headerName.includes("scorer") ? data.topScorers : data.assistProviders
+            headerName.trim().toLocaleLowerCase().includes("scorers") ?
+              data.topScorers
+            : data.assistProviders
           ),
         },
       }}
       className="py-2">
-      <View className="flex-row items-center justify-between w-full">
+      <View className="flex-row items-center justify-between w-full bg-white">
         <Subtitles subtitle={headerName} />
         <Ionicons name="chevron-forward-sharp" size={14} color={colors.slate[400]} />
       </View>

@@ -84,7 +84,7 @@ const SeasonCard = ({ cardTitle = "", seasonOverview }: SeasonOverviewType) => {
           <StandingsCard standings={standings} />
 
           {topScorer && topAssister ?
-            <View className="flex-col gap-8 mt-10">
+            <View className="flex-col gap-6 mt-10">
               <View>
                 <View className="flex-row items-center gap-2 pb-2">
                   <Text className="uppercase font-extrabold text-slate-500 text-[13px]">
@@ -92,21 +92,21 @@ const SeasonCard = ({ cardTitle = "", seasonOverview }: SeasonOverviewType) => {
                   </Text>
                   {/* <Ionicons name="medal" size={13} color={colors.orange[600]} /> */}
                 </View>
-                {scorers.map((s) => (
-                  <View className="flex-row items-center justify-between my-2">
+                {scorers.map((s, i) => (
+                  <View key={i} className="flex-row items-center justify-between mb-2">
                     <View className="flex-row items-center justify-center gap-2">
-                      <Text className="text-[17px] text-slate-500">{s?.player}</Text>
+                      <Text className="text-[16px] text-slate-500">{s?.player}</Text>
                       <LinearGradient
                         colors={[colors.orange[500], colors.orange[700]]}
-                        style={{ borderRadius: 50 }}>
-                        <View className="w-5 h-5 rounded-full flex items-center justify-center">
-                          <Text className="text-white font-extrabold">{s?.goals}</Text>
+                        style={{ borderRadius: 4 }}>
+                        <View className="flex items-center justify-center px-3 rounded-full">
+                          <Text className="text-white font-semibold text-[12px] py-1">{`${s?.goals > 1 ? s?.goals + " goals" : s?.goals + " goal"}`}</Text>
                         </View>
                       </LinearGradient>
                     </View>
                     <View>
                       <Text
-                        className={`text-[17px] ${s?.team.trim().toLocaleLowerCase() === "red team" && "text-red-500"} ${s?.team.trim().toLocaleLowerCase() === "blue team" && "text-blue-500"}`}>
+                        className={`text-[15px] ${s?.team.trim().toLocaleLowerCase() === "red team" && "text-red-500"} ${s?.team.trim().toLocaleLowerCase() === "blue team" && "text-blue-500"}`}>
                         {s?.team}
                       </Text>
                     </View>
@@ -119,23 +119,22 @@ const SeasonCard = ({ cardTitle = "", seasonOverview }: SeasonOverviewType) => {
                   <Text className="uppercase font-extrabold text-slate-500 text-[13px]">
                     Top Assist provider
                   </Text>
-                  {/* <Ionicons name="medal" size={13} color={colors.orange[500]} /> */}
                 </View>
-                {assisters.map((t) => (
-                  <View className="flex-row items-center justify-between my-2">
+                {assisters.map((t, i) => (
+                  <View key={i} className="flex-row items-center justify-between mb-2">
                     <View className="flex-row items-center justify-center gap-2">
-                      <Text className="text-[17px] text-slate-500">{t?.player}</Text>
+                      <Text className="text-[16px] text-slate-500">{t?.player}</Text>
                       <LinearGradient
                         colors={[colors.orange[500], colors.orange[700]]}
-                        style={{ borderRadius: 50 }}>
-                        <View className="w-5 h-5 rounded-full flex items-center justify-center">
-                          <Text className="text-white font-extrabold">{t?.assists}</Text>
+                        style={{ borderRadius: 4 }}>
+                        <View className="rounded-full flex items-center justify-center px-3">
+                          <Text className="text-white font-semibold text-[12px] py-1">{`${t?.assists > 1 ? t?.assists + " assists" : t?.assists + " assist"}`}</Text>
                         </View>
                       </LinearGradient>
                     </View>
                     <View>
                       <Text
-                        className={`text-[17px] ${t?.team.trim().toLocaleLowerCase() === "red team" && "text-red-500"} ${t?.team.trim().toLocaleLowerCase() === "blue team" && "text-blue-500"}`}>
+                        className={`text-[15px] ${t?.team.trim().toLocaleLowerCase() === "red team" && "text-red-500"} ${t?.team.trim().toLocaleLowerCase() === "blue team" && "text-blue-500"}`}>
                         {t?.team}
                       </Text>
                     </View>

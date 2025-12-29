@@ -1,20 +1,21 @@
 import LoadingSpinner from "@/components/LoadingSpinner";
+import { PlayerRow } from "@/components/PlayerRow";
 import TopStatsCard from "@/components/TopStatsCard";
 import { api } from "@/convex/_generated/api";
 import { useFilters } from "@/hooks/useFilter";
 import { useQuery } from "convex/react";
-import { FlatList, ListRenderItem, Text, View } from "react-native";
+import { SectionList, SectionListRenderItem, Text, View } from "react-native";
 
-interface Year {
-  id: string;
-  year: string;
-}
+// interface Year {
+//   id: string;
+//   year: string;
+// }
 
-interface Season {
-  id: string;
-  season: string;
-  yearId: string;
-}
+// interface Season {
+//   id: string;
+//   season: string;
+//   yearId: string;
+// }
 
 type PlayerGoal = {
   playerName: string;
@@ -27,6 +28,17 @@ type PlayerAssist = {
   numOfAssist: number;
   team: string | null;
 };
+
+type SectionType = {
+  type: "scorer" | "assister";
+  title: string;
+  data: (PlayerGoal | PlayerAssist)[];
+};
+
+// type PlayerRowProps = {
+//   item: PlayerGoal | PlayerAssist;
+//   sectionType: "scorer" | "assister";
+// };
 
 type TopStats = {
   topScorers: (PlayerGoal | null)[];
@@ -46,107 +58,54 @@ const PlayerStatsScreen = () => {
 
   const topStats: TopStats = topStatsData ?? { topScorers: [], assistProviders: [] };
 
-  const topScorers: (PlayerGoal | null)[] = topStats.topScorers;
-  const topAssister: (PlayerAssist | null)[] = topStats.assistProviders;
+  // const topScorers: (PlayerGoal | null)[] = topStats.topScorers;
+  // const topAssister: (PlayerAssist | null)[] = topStats.assistProviders;
 
-  // Filter out nulls
-  const validScorers = topScorers.filter((s): s is PlayerGoal => s !== null);
-  const validAssister = topAssister.filter((s): s is PlayerAssist => s !== null);
+  const goalData: PlayerGoal[] = topStats.topScorers.filter(
+    (item): item is PlayerGoal => item !== null
+  );
 
-  // Find the player with the highest goals
-  const highestScorer = validScorers.reduce<PlayerGoal | null>((prev, curr) => {
-    if (!prev) return curr;
+  const assistData: PlayerAssist[] = topStats.assistProviders.filter(
+    (item): item is PlayerAssist => item !== null
+  );
 
-    return curr.numOfGoals > prev.numOfGoals ? curr : prev;
-  }, null);
+  const sections: SectionType[] = [
+    { type: "scorer", title: "Top Scorers", data: goalData },
+    {
+      type: "assister",
+      title: "Top Assist Providers",
+      data: assistData,
+    },
+  ] as const;
 
-  // Find the player with the highest assists
-  const highestAssistProvider = validAssister.reduce<PlayerAssist | null>((prev, curr) => {
-    if (!prev) return curr;
+  const renderTopStatsItem: SectionListRenderItem<PlayerGoal | PlayerAssist, SectionType> = ({
+    item,
+    section,
+  }) => {
+    if (!item) return null;
 
-    return curr.numOfAssist > prev.numOfAssist ? curr : prev;
-  }, null);
+    if (section.type === "scorer") {
+      return <PlayerRow item={item as PlayerGoal} sectionType="scorer" />;
+    }
 
-  // console.log(filters);
-
-  const renderTopScorerItem: ListRenderItem<PlayerGoal | null> = ({ item }) => {
-    if (!item) return null; // handle potential null values safely
-
-    return (
-      <View className="flex-row items-center my-2">
-        <View className="w-2/5">
-          <Text className="text-[16px] text-slate-600">{item.playerName}</Text>
-        </View>
-        <View className="w-2/5">
-          <Text
-            className={`${item.team?.trim().toLocaleLowerCase() === "red team" && "text-red-500"} ${item.team?.trim().toLocaleLowerCase() === "blue team" && "text-blue-500"} text-[16px]`}>
-            {item.team}
-          </Text>
-        </View>
-        <View className="w-1/5 flex items-end">
-          <View
-            className={`flex items-center justify-center rounded-full h-7 w-7 ${item.playerName === highestScorer?.playerName ? "bg-slate-700" : ""}`}>
-            <Text
-              className={`text-[16px] ${item.playerName === highestScorer?.playerName ? "text-slate-100" : "text-slate-500"}  font-bold`}>
-              {item.numOfGoals}
-            </Text>
-          </View>
-        </View>
-      </View>
-    );
-  };
-
-  const renderTopAssistItem: ListRenderItem<PlayerAssist | null> = ({ item }) => {
-    if (!item) return null; // handle potential null values safely
-
-    return (
-      <View className="flex-row items-center my-2">
-        <View className="w-2/5">
-          <Text className="text-[16px] text-slate-600">{item.playerName}</Text>
-        </View>
-        <View className="w-2/5">
-          <Text
-            className={`${item.team?.trim().toLocaleLowerCase() === "red team" && "text-red-500"} ${item.team?.trim().toLocaleLowerCase() === "blue team" && "text-blue-500"} text-[16px]`}>
-            {item.team}
-          </Text>
-        </View>
-        <View className="w-1/5 flex items-end">
-          <View
-            className={`flex items-center justify-center rounded-full h-7 w-7 ${item.playerName === highestAssistProvider?.playerName ? "bg-slate-700" : ""}`}>
-            <Text
-              className={`text-[16px] ${item.playerName === highestAssistProvider?.playerName ? "text-slate-100" : "text-slate-500"}  font-bold`}>
-              {item.numOfAssist}
-            </Text>
-          </View>
-        </View>
-      </View>
-    );
+    return <PlayerRow item={item as PlayerAssist} sectionType={section.type} />;
   };
 
   return (
-    <View className="px-5 flex-col">
+    <View className="px-5 flex-col flex-1">
       <Text className="font-extrabold text-[16px] text-slate-700 py-4 uppercase">Top stats</Text>
       <View className="flex-col gap-5">
         <View className="bg-white p-7 rounded-lg flex-col gap-5">
-          <TopStatsCard headerName="top scorer" data={topStats} />
-          <View className="flex-col gap-5">
-            <FlatList
-              data={topStats.topScorers.filter(Boolean)}
-              renderItem={renderTopScorerItem}
-              keyExtractor={(item, index) => item?.playerName ?? index.toString()}
-            />
-          </View>
-        </View>
-
-        <View className="bg-white p-7 rounded-lg flex-col gap-5">
-          <TopStatsCard headerName="top assist provider" data={topStats} />
-          <View className="flex-col gap-5">
-            <FlatList
-              data={topStats.assistProviders.filter(Boolean)}
-              renderItem={renderTopAssistItem}
-              keyExtractor={(item, index) => item?.playerName ?? index.toString()}
-            />
-          </View>
+          <SectionList
+            sections={sections}
+            stickySectionHeadersEnabled={false}
+            keyExtractor={(item, index) => (item ? item.playerName : `${index}`)}
+            renderSectionHeader={({ section }) => (
+              <TopStatsCard headerName={section.title} data={topStats} />
+            )}
+            renderItem={renderTopStatsItem}
+            renderSectionFooter={() => <View className="my-6 border-b border-slate-100"></View>}
+          />
         </View>
       </View>
     </View>

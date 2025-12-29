@@ -17,7 +17,7 @@ const TopTabsLayout = () => {
           tabBarIndicatorStyle: { backgroundColor: colors.slate[100] },
           tabBarItemStyle: { width: "auto" },
           tabBarLabelStyle: { fontWeight: "bold", fontSize: 17 },
-          tabBarStyle: { backgroundColor: colors.slate[900] },
+          tabBarStyle: { backgroundColor: colors.slate[800], paddingTop: 25 },
           tabBarBounces: true,
           swipeEnabled: true,
           animationEnabled: true,
